@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="760" viewBox="0 0 1800 760">
+  <rect width="1800" height="760" rx="36" fill="#F7F7F4"/>
+  <text x="80" y="92" font-family="Inter, Arial" font-size="48" font-weight="700" fill="#131419">PocketOrbit Mascot Family</text>
+  <g transform="translate(35,120) scale(.58)">
+    <path d="M215 202 Q355 103 495 202 L542 458 Q554 566 455 614 Q355 662 255 614 Q156 566 168 458 Z"
+          fill="#6C5CE7" stroke="#131419" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M219 264 Q355 305 491 264" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+    <ellipse cx="355" cy="383" rx="284" ry="105" transform="rotate(-18 355 383)"
+             fill="none" stroke="#131419" stroke-width="16"/>
+    <circle cx="613" cy="271" r="30" fill="#FFC857" stroke="#131419" stroke-width="14"/>
+    <circle cx="316" cy="404" r="12" fill="#131419"/>
+    <circle cx="394" cy="404" r="12" fill="#131419"/>
+    <path d="M313 458 Q355 492 397 458" fill="none" stroke="#131419" stroke-width="12" stroke-linecap="round"/>
+    <path d="M204 530 Q131 551 108 613" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <path d="M506 530 Q579 551 602 613" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="103" cy="624" r="23" fill="#56B7FF" stroke="#131419" stroke-width="12"/>
+    <circle cx="607" cy="624" r="23" fill="#56B7FF" stroke="#131419" stroke-width="12"/>
+    <path d="M292 626 L274 688" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <path d="M419 626 L437 688" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <ellipse cx="266" cy="705" rx="46" ry="20" fill="#18C98B" stroke="#131419" stroke-width="12"/>
+    <ellipse cx="445" cy="705" rx="46" ry="20" fill="#18C98B" stroke="#131419" stroke-width="12"/>
+  </g>
+  <g transform="translate(635,120) scale(.58)">
+    <path d="M340 80 L340 20" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="340" cy="18" r="24" fill="#FF6B6B" stroke="#131419" stroke-width="12"/>
+    <rect x="170" y="120" width="340" height="330" rx="92" fill="#56B7FF" stroke="#131419" stroke-width="18"/>
+    <rect x="228" y="184" width="224" height="110" rx="38" fill="#FFFFFF" stroke="#131419" stroke-width="14"/>
+    <circle cx="295" cy="238" r="12" fill="#131419"/>
+    <circle cx="385" cy="238" r="12" fill="#131419"/>
+    <path d="M299 266 Q340 290 381 266" fill="none" stroke="#131419" stroke-width="10" stroke-linecap="round"/>
+    <path d="M168 260 L86 228" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="72" cy="222" r="23" fill="#FFC857" stroke="#131419" stroke-width="12"/>
+    <path d="M512 260 L594 228" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="608" cy="222" r="23" fill="#FFC857" stroke="#131419" stroke-width="12"/>
+    <rect x="254" y="500" width="340" height="190" rx="34" fill="#FFFFFF" stroke="#131419" stroke-width="16"/>
+    <rect x="286" y="536" width="88" height="84" rx="18" fill="#18C98B" stroke="#131419" stroke-width="10"/>
+    <path d="M407 548 H547" stroke="#131419" stroke-width="14" stroke-linecap="round"/>
+    <path d="M407 588 H520" stroke="#7B7E87" stroke-width="12" stroke-linecap="round"/>
+    <path d="M407 628 H552" stroke="#6C5CE7" stroke-width="12" stroke-linecap="round"/>
+    <path d="M266 452 L235 522" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <path d="M414 452 L448 516" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <ellipse cx="218" cy="545" rx="44" ry="20" fill="#6C5CE7" stroke="#131419" stroke-width="12"/>
+    <ellipse cx="468" cy="533" rx="44" ry="20" fill="#6C5CE7" stroke="#131419" stroke-width="12"/>
+  </g>
+  <g transform="translate(1235,120) scale(.58)">
+    <path d="M104 430 C40 380 23 320 42 259 C63 191 131 147 207 152"
+          fill="none" stroke="#FF6B6B" stroke-width="34" stroke-linecap="round" opacity=".95"/>
+    <path d="M116 476 C65 452 37 421 23 390" fill="none" stroke="#56B7FF" stroke-width="24" stroke-linecap="round"/>
+    <path d="M341 114
+             L391 219
+             L507 233
+             L421 314
+             L444 429
+             L341 372
+             L238 429
+             L261 314
+             L175 233
+             L291 219 Z"
+          fill="#FFC857" stroke="#131419" stroke-width="18" stroke-linejoin="round"/>
+    <circle cx="303" cy="281" r="12" fill="#131419"/>
+    <circle cx="379" cy="281" r="12" fill="#131419"/>
+    <path d="M306 326 Q341 356 376 326" fill="none" stroke="#131419" stroke-width="11" stroke-linecap="round"/>
+    <ellipse cx="341" cy="280" rx="268" ry="92" transform="rotate(-18 341 280)"
+             fill="none" stroke="#131419" stroke-width="15"/>
+    <circle cx="585" cy="196" r="27" fill="#6C5CE7" stroke="#131419" stroke-width="12"/>
+    <path d="M255 421 L229 516" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <path d="M427 421 L453 516" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <ellipse cx="215" cy="533" rx="45" ry="20" fill="#18C98B" stroke="#131419" stroke-width="12"/>
+    <ellipse cx="468" cy="533" rx="45" ry="20" fill="#18C98B" stroke="#131419" stroke-width="12"/>
+    <path d="M187 326 Q113 348 92 411" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <path d="M495 326 Q568 348 589 411" fill="none" stroke="#131419" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="86" cy="423" r="22" fill="#56B7FF" stroke="#131419" stroke-width="11"/>
+    <circle cx="595" cy="423" r="22" fill="#56B7FF" stroke="#131419" stroke-width="11"/>
+  </g>
+  <text x="265" y="700" font-family="Inter, Arial" font-size="34" font-weight="700" fill="#131419">Orbit</text>
+  <text x="870" y="700" font-family="Inter, Arial" font-size="34" font-weight="700" fill="#131419">Scout</text>
+  <text x="1450" y="700" font-family="Inter, Arial" font-size="34" font-weight="700" fill="#131419">Comet</text>
+</svg>
