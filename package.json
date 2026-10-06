@@ -1,0 +1,14 @@
+{
+  "name": "pocketorbit",
+  "private": true,
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @pocketorbit/web dev",
+    "dev:api": "uv run --directory apps/api fastapi dev app/main.py --host 0.0.0.0 --port 8000",
+    "build": "pnpm --filter @pocketorbit/web build",
+    "lint": "pnpm --filter @pocketorbit/web lint",
+    "typecheck": "pnpm --filter @pocketorbit/web typecheck"
+  }
+}

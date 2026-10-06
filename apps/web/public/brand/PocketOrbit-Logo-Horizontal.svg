@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="480" viewBox="0 0 1600 480">
+  <g transform="translate(85,60)">
+    <rect x="0" y="35" width="290" height="290" rx="92" fill="#FFFFFF" stroke="#131419" stroke-width="18"/>
+    <path d="M78 155 C112 128 179 126 214 151 C239 170 242 205 225 233 C207 262 170 280 130 272 C91 265 62 239 56 207"
+          fill="none" stroke="#6C5CE7" stroke-width="20" stroke-linecap="round"/>
+    <ellipse cx="145" cy="178" rx="145" ry="64" transform="rotate(-22 145 178)"
+             fill="none" stroke="#131419" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="268" cy="119" r="24" fill="#6C5CE7" stroke="#131419" stroke-width="12"/>
+    <circle cx="124" cy="186" r="10" fill="#131419"/>
+    <circle cx="166" cy="186" r="10" fill="#131419"/>
+    <path d="M126 221 Q145 238 166 221" fill="none" stroke="#131419" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <text x="455" y="285" font-family="Inter, Arial, sans-serif" font-size="164" font-weight="700" letter-spacing="-7">
+    <tspan fill="#131419">Pocket</tspan><tspan fill="#6C5CE7">Orbit</tspan>
+  </text>
+</svg>

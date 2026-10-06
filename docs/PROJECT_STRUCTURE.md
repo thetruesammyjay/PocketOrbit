@@ -1,290 +1,245 @@
 # PocketOrbit Project Structure
 
-This document maps the repository, explains the role of each planned application area, and records the system boundaries that keep PocketOrbit understandable and read-only.
+This document records the files in the current scaffold and the boundaries between the web app, API, shared packages, and providers.
 
 ## Repository status
 
-The current checkout is a documentation-and-assets starter. It contains the files listed under **Present in this checkout**. Application and configuration files in the target map are **planned**; their presence in this document does not mean that they have been implemented.
+PocketOrbit now has an initial monorepo scaffold. The web app includes public pages and a sample portfolio experience. The API includes health, deterministic demo, CSV preview, and a stateless live wallet snapshot endpoint for configured RPC providers. Authentication, persistence, and exchange-specific integrations are not connected.
 
-### Present in this checkout
+The inventory below lists files currently present. No JavaScript or Python dependency lockfile has been generated yet; pnpm and uv create them during installation or first run. No test files are included in this scaffold.
 
-```text
-PocketOrbit/
-├── README.md
-├── assets/
-│   ├── PocketOrbit-Logo-Horizontal.svg
-│   ├── PocketOrbit-Logo-Horizontal.png
-│   ├── PocketOrbit-Mascot-Orbit.svg
-│   ├── PocketOrbit-Mascot-Orbit.png
-│   ├── PocketOrbit-Mascot-Scout.svg
-│   ├── PocketOrbit-Mascot-Scout.png
-│   ├── PocketOrbit-Mascot-Comet.svg
-│   ├── PocketOrbit-Mascot-Comet.png
-│   ├── PocketOrbit-Mascot-Family.svg
-│   ├── PocketOrbit-Mascot-Family.png
-│   └── PocketOrbit-Product-Flow.png
-└── docs/
-    ├── DESIGN.md
-    ├── HACKATHON.md
-    └── PROJECT_STRUCTURE.md
-```
+## Current file inventory
 
-The SVG files are the scalable brand artwork. PNG files are raster versions for contexts that need them. Keep these source assets in `assets/`; a web deployment may expose copies from its public directory when static URLs are needed.
+    PocketOrbit/
+    ├── .editorconfig
+    ├── .env.example
+    ├── .gitignore
+    ├── package.json
+    ├── pnpm-workspace.yaml
+    ├── README.md
+    ├── assets/
+    │   ├── PocketOrbit-Logo-Horizontal.svg
+    │   ├── PocketOrbit-Logo-Horizontal.png
+    │   ├── PocketOrbit-Mascot-Orbit.svg
+    │   ├── PocketOrbit-Mascot-Orbit.png
+    │   ├── PocketOrbit-Mascot-Scout.svg
+    │   ├── PocketOrbit-Mascot-Scout.png
+    │   ├── PocketOrbit-Mascot-Comet.svg
+    │   ├── PocketOrbit-Mascot-Comet.png
+    │   ├── PocketOrbit-Mascot-Family.svg
+    │   ├── PocketOrbit-Mascot-Family.png
+    │   └── PocketOrbit-Product-Flow.png
+    ├── apps/
+    │   ├── web/
+    │   │   ├── .env.example
+    │   │   ├── eslint.config.mjs
+    │   │   ├── next.config.ts
+    │   │   ├── next-env.d.ts
+    │   │   ├── package.json
+    │   │   ├── postcss.config.mjs
+    │   │   ├── tsconfig.json
+    │   │   ├── app/
+    │   │   │   ├── globals.css
+    │   │   │   ├── layout.tsx
+    │   │   │   ├── page.tsx
+    │   │   │   ├── how-it-works/page.tsx
+    │   │   │   ├── learn/page.tsx
+    │   │   │   ├── login/page.tsx
+    │   │   │   ├── privacy/page.tsx
+    │   │   │   ├── register/page.tsx
+    │   │   │   ├── security/page.tsx
+    │   │   │   ├── terms/page.tsx
+    │   │   │   ├── app/
+    │   │   │   │   ├── layout.tsx
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   ├── activity/page.tsx
+    │   │   │   │   ├── import/page.tsx
+    │   │   │   │   ├── insights/page.tsx
+    │   │   │   │   ├── learn/page.tsx
+    │   │   │   │   ├── portfolio/page.tsx
+    │   │   │   │   ├── reports/page.tsx
+    │   │   │   │   ├── settings/page.tsx
+    │   │   │   │   ├── sources/page.tsx
+    │   │   │   │   └── wallets/add/page.tsx
+    │   │   │   └── admin/
+    │   │   │       ├── layout.tsx
+    │   │   │       ├── page.tsx
+    │   │   │       ├── assets/page.tsx
+    │   │   │       ├── audit/page.tsx
+    │   │   │       ├── imports/page.tsx
+    │   │   │       ├── jobs/page.tsx
+    │   │   │       ├── portfolios/page.tsx
+    │   │   │       ├── settings/page.tsx
+    │   │   │       ├── sources/page.tsx
+    │   │   │       ├── system/page.tsx
+    │   │   │       └── users/page.tsx
+    │   │   ├── components/
+    │   │   │   ├── admin-feature-page.tsx
+    │   │   │   ├── admin-shell.tsx
+    │   │   │   ├── app-shell.tsx
+    │   │   │   ├── feature-page.tsx
+    │   │   │   ├── icon.tsx
+    │   │   │   ├── page-heading.tsx
+    │   │   │   ├── quality-status.tsx
+    │   │   │   └── site-header.tsx
+    │   │   ├── features/
+    │   │   │   ├── activity/activity-list.tsx
+    │   │   │   ├── imports/import-preview-form.tsx
+    │   │   │   └── portfolio/
+    │   │   │       ├── allocation-breakdown.tsx
+    │   │   │       ├── dashboard.tsx
+    │   │   │       ├── demo-data.ts
+    │   │   │       ├── holdings-table.tsx
+    │   │   │       ├── portfolio-api.ts
+    │   │   │       └── portfolio-chart.tsx
+    │   │   ├── lib/
+    │   │   │   ├── format.ts
+    │   │   │   └── routes.ts
+    │   │   └── public/brand/
+    │   │       ├── PocketOrbit-Logo-Horizontal.svg
+    │   │       ├── PocketOrbit-Mascot-Comet.svg
+    │   │       ├── PocketOrbit-Mascot-Orbit.svg
+    │   │       ├── PocketOrbit-Mascot-Scout.svg
+    │   │       ├── PocketOrbit-Orbit.png
+    │   │       ├── PocketOrbit-Product-Flow.png
+    │   │       ├── PocketOrbit-Favico.png
+    │   │       ├── pocketorbit-comet.png
+    │   │       └── pocketorbit-scout.png
+    │   └── api/
+    │       ├── .env.example
+    │       ├── README.md
+    │       ├── alembic.ini
+    │       ├── pyproject.toml
+    │       ├── railway.toml
+    │       ├── app/
+    │       │   ├── __init__.py
+    │       │   ├── main.py
+    │       │   ├── api/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── router.py
+    │       │   │   └── routes/
+    │       │   │       ├── __init__.py
+    │       │   │       ├── admin.py
+    │       │   │       ├── health.py
+    │       │   │       ├── imports.py
+    │       │   │       ├── portfolios.py
+    │       │   │       ├── reports.py
+    │       │   │       ├── sources.py
+    │       │   │       └── wallets.py
+    │       │   ├── calculations/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── allocation.py
+    │       │   │   ├── balances.py
+    │       │   │   ├── performance.py
+    │       │   │   └── valuation.py
+    │       │   ├── connectors/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── base.py
+    │       │   │   ├── blockchain/
+    │       │   │   │   ├── __init__.py
+    │       │   │   │   ├── evm.py
+    │       │   │   │   ├── networks.py
+    │       │   │   │   └── solana.py
+    │       │   │   ├── exchanges/
+    │       │   │   │   ├── __init__.py
+    │       │   │   │   └── csv/
+    │       │   │   │       ├── __init__.py
+    │       │   │   │       ├── base.py
+    │       │   │   │       └── registry.py
+    │       │   │   ├── market_data/
+    │       │   │   │   ├── __init__.py
+    │       │   │   │   ├── base.py
+    │       │   │   │   └── coingecko.py
+    │       │   │   └── rpc.py
+    │       │   ├── core/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── config.py
+    │       │   │   ├── database.py
+    │       │   │   ├── logging.py
+    │       │   │   └── security.py
+    │       │   ├── models/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── activity.py
+    │       │   │   ├── asset.py
+    │       │   │   ├── audit_event.py
+    │       │   │   ├── balance.py
+    │       │   │   ├── import_job.py
+    │       │   │   ├── portfolio.py
+    │       │   │   ├── price.py
+    │       │   │   ├── source.py
+    │       │   │   ├── sync_job.py
+    │       │   │   ├── user.py
+    │       │   │   └── valuation.py
+    │       │   ├── schemas/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── activity.py
+    │       │   │   ├── asset.py
+    │       │   │   ├── auth.py
+    │       │   │   ├── common.py
+    │       │   │   ├── imports.py
+    │       │   │   ├── portfolio.py
+    │       │   │   ├── source.py
+    │       │   │   └── wallet.py
+    │       │   ├── services/
+    │       │   │   ├── __init__.py
+    │       │   │   ├── activity_service.py
+    │       │   │   ├── asset_service.py
+    │       │   │   ├── demo_data.py
+    │       │   │   ├── import_service.py
+    │       │   │   ├── portfolio_service.py
+    │       │   │   ├── pricing_service.py
+    │       │   │   ├── quality_service.py
+    │       │   │   ├── report_service.py
+    │       │   │   ├── source_service.py
+    │       │   │   └── wallet_service.py
+    │       │   ├── workers/
+    │       │   │   ├── __init__.py
+    │       │   │   └── jobs.py
+    │       │   └── workflows/
+    │       │       ├── __init__.py
+    │       │       ├── import_workflow.py
+    │       │       ├── portfolio_refresh_workflow.py
+    │       │       └── wallet_sync_workflow.py
+    │       └── migrations/
+    │           ├── env.py
+    │           ├── script.py.mako
+    │           └── versions/0001_initial.py
+    ├── packages/
+    │   ├── config/
+    │   │   ├── eslint.config.mjs
+    │   │   ├── package.json
+    │   │   └── tsconfig.base.json
+    │   ├── types/
+    │   │   ├── package.json
+    │   │   └── src/
+    │   │       ├── activity.ts
+    │   │       ├── asset.ts
+    │   │       ├── index.ts
+    │   │       ├── portfolio.ts
+    │   │       ├── source.ts
+    │   │       └── wallet.ts
+    │   └── ui/
+    │       ├── package.json
+    │       └── src/
+    │           ├── badge.tsx
+    │           ├── button.tsx
+    │           ├── card.tsx
+    │           └── index.ts
+    └── docs/
+        ├── API.md
+        ├── ARCHITECTURE.md
+        ├── CONNECTORS.md
+        ├── DATA-MODEL.md
+        ├── DESIGN.md
+        ├── HACKATHON.md
+        ├── PROJECT_STRUCTURE.md
+        └── SECURITY.md
 
-### Target repository map
-
-The following is the intended monorepo layout for the product. `planned` labels distinguish future implementation files from the current checkout. Generated lockfiles and migration revisions are created by their tools as the project is implemented.
-
-```text
-PocketOrbit/
-├── .editorconfig                         # planned: shared editor formatting
-├── .env.example                          # planned: documented variable names, no secrets
-├── .gitignore                            # planned: build output, caches, local secrets
-├── package.json                          # planned: root scripts and workspace commands
-├── pnpm-workspace.yaml                   # planned: JavaScript workspace definition
-├── pnpm-lock.yaml                        # generated: pinned JavaScript dependencies
-├── LICENSE                               # optional: add after the project license is chosen
-├── README.md                             # present: short product introduction
-├── assets/                               # present: brand and mascot source artwork
-│   ├── PocketOrbit-Logo-Horizontal.svg
-│   ├── PocketOrbit-Logo-Horizontal.png
-│   ├── PocketOrbit-Mascot-Orbit.svg
-│   ├── PocketOrbit-Mascot-Orbit.png
-│   ├── PocketOrbit-Mascot-Scout.svg
-│   ├── PocketOrbit-Mascot-Scout.png
-│   ├── PocketOrbit-Mascot-Comet.svg
-│   ├── PocketOrbit-Mascot-Comet.png
-│   ├── PocketOrbit-Mascot-Family.svg
-│   ├── PocketOrbit-Mascot-Family.png
-│   └── PocketOrbit-Product-Flow.png             # present: README product explainer
-├── apps/
-│   ├── web/                              # planned: Next.js user and admin application
-│   │   ├── package.json
-│   │   ├── next.config.ts
-│   │   ├── postcss.config.mjs
-│   │   ├── tsconfig.json
-│   │   ├── public/
-│   │   │   └── brand/                    # static copies of the root brand assets
-│   │   │       ├── PocketOrbit-Logo-Horizontal.svg
-│   │   │       ├── PocketOrbit-Logo-Horizontal.png
-│   │   │       ├── PocketOrbit-Mascot-Orbit.svg
-│   │   │       ├── PocketOrbit-Mascot-Orbit.png
-│   │   │       ├── PocketOrbit-Mascot-Scout.svg
-│   │   │       ├── PocketOrbit-Mascot-Scout.png
-│   │   │       ├── PocketOrbit-Mascot-Comet.svg
-│   │   │       ├── PocketOrbit-Mascot-Comet.png
-│   │   │       ├── PocketOrbit-Mascot-Family.svg
-│   │   │       └── PocketOrbit-Mascot-Family.png
-│   │   ├── app/
-│   │   │   ├── layout.tsx                # global metadata, font, and providers
-│   │   │   ├── globals.css               # Tailwind entry and global styles
-│   │   │   ├── page.tsx                  # public landing page: /
-│   │   │   ├── how-it-works/page.tsx     # public product explanation
-│   │   │   ├── security/page.tsx         # public security explanation
-│   │   │   ├── learn/page.tsx            # public education landing page
-│   │   │   ├── privacy/page.tsx          # public privacy information
-│   │   │   ├── terms/page.tsx            # public terms
-│   │   │   ├── login/page.tsx            # sign-in screen
-│   │   │   ├── register/page.tsx         # account creation screen
-│   │   │   ├── app/
-│   │   │   │   ├── layout.tsx            # authenticated user-app shell
-│   │   │   │   ├── page.tsx              # overview dashboard: /app
-│   │   │   │   ├── portfolio/page.tsx
-│   │   │   │   ├── activity/page.tsx
-│   │   │   │   ├── sources/page.tsx
-│   │   │   │   ├── insights/page.tsx
-│   │   │   │   ├── learn/page.tsx
-│   │   │   │   ├── import/page.tsx
-│   │   │   │   ├── wallets/add/page.tsx
-│   │   │   │   ├── reports/page.tsx
-│   │   │   │   └── settings/page.tsx
-│   │   │   └── admin/
-│   │   │       ├── layout.tsx            # protected operational shell
-│   │   │       ├── page.tsx              # admin overview
-│   │   │       ├── users/page.tsx
-│   │   │       ├── portfolios/page.tsx
-│   │   │       ├── imports/page.tsx
-│   │   │       ├── sources/page.tsx
-│   │   │       ├── assets/page.tsx
-│   │   │       ├── jobs/page.tsx
-│   │   │       ├── system/page.tsx
-│   │   │       ├── audit/page.tsx
-│   │   │       └── settings/page.tsx
-│   │   ├── components/
-│   │   │   ├── app-shell.tsx             # shared user navigation and layout
-│   │   │   ├── admin-shell.tsx           # admin navigation and layout
-│   │   │   ├── site-header.tsx           # public-site navigation
-│   │   │   ├── mobile-navigation.tsx     # user bottom navigation and More sheet
-│   │   │   ├── source-freshness.tsx      # provenance and retrieval details
-│   │   │   ├── quality-status.tsx        # Fresh/Partial/etc. status display
-│   │   │   ├── empty-state.tsx
-│   │   │   └── page-heading.tsx
-│   │   ├── features/
-│   │   │   ├── portfolio/
-│   │   │   │   ├── portfolio-value-card.tsx
-│   │   │   │   ├── portfolio-history-chart.tsx
-│   │   │   │   ├── allocation-breakdown.tsx
-│   │   │   │   ├── account-list.tsx
-│   │   │   │   └── portfolio-api.ts
-│   │   │   ├── activity/
-│   │   │   │   ├── activity-table.tsx
-│   │   │   │   ├── activity-card.tsx
-│   │   │   │   └── activity-api.ts
-│   │   │   ├── sources/
-│   │   │   │   ├── source-list.tsx
-│   │   │   │   └── source-api.ts
-│   │   │   ├── imports/
-│   │   │   │   ├── import-form.tsx
-│   │   │   │   ├── import-review.tsx
-│   │   │   │   └── import-api.ts
-│   │   │   ├── wallets/
-│   │   │   │   ├── add-wallet-form.tsx
-│   │   │   │   └── wallet-api.ts
-│   │   │   ├── insights/
-│   │   │   │   ├── insight-list.tsx
-│   │   │   │   └── insight-api.ts
-│   │   │   └── admin/
-│   │   │       ├── source-health-table.tsx
-│   │   │       ├── import-diagnostics.tsx
-│   │   │       └── admin-api.ts
-│   │   ├── hooks/
-│   │   │   ├── use-portfolio.ts
-│   │   │   └── use-refresh.ts
-│   │   └── lib/
-│   │       ├── api-client.ts             # typed API transport
-│   │       ├── auth.ts                   # client-side auth helpers
-│   │       ├── format.ts                 # money, quantity, and date formatting
-│   │       └── routes.ts                 # route constants
-│   └── api/                              # planned: Python FastAPI service
-│       ├── pyproject.toml                # Python dependencies and tool config
-│       ├── alembic.ini                   # migration tool configuration
-│       ├── railway.toml                   # planned deployment configuration
-│       ├── app/
-│       │   ├── __init__.py
-│       │   ├── main.py                    # ASGI entry point
-│       │   ├── api/
-│       │   │   ├── __init__.py
-│       │   │   ├── router.py              # API route registration
-│       │   │   └── routes/
-│       │   │       ├── __init__.py
-│       │   │       ├── health.py
-│       │   │       ├── auth.py
-│       │   │       ├── portfolios.py
-│       │   │       ├── sources.py
-│       │   │       ├── imports.py
-│       │   │       ├── wallets.py
-│       │   │       ├── activity.py
-│       │   │       ├── insights.py
-│       │   │       ├── reports.py
-│       │   │       └── admin.py
-│       │   ├── core/
-│       │   │   ├── config.py              # environment-backed settings
-│       │   │   ├── database.py            # PostgreSQL session and engine
-│       │   │   ├── security.py            # authentication and authorization
-│       │   │   └── logging.py
-│       │   ├── models/                    # SQLAlchemy persistence models
-│       │   │   ├── user.py
-│       │   │   ├── portfolio.py
-│       │   │   ├── source.py
-│       │   │   ├── asset.py
-│       │   │   ├── balance.py
-│       │   │   ├── transaction.py
-│       │   │   ├── price.py
-│       │   │   ├── valuation.py
-│       │   │   ├── import_job.py
-│       │   │   ├── sync_job.py
-│       │   │   └── audit_event.py
-│       │   ├── schemas/                   # Pydantic request/response contracts
-│       │   │   ├── auth.py
-│       │   │   ├── portfolio.py
-│       │   │   ├── source.py
-│       │   │   ├── asset.py
-│       │   │   ├── activity.py
-│       │   │   ├── imports.py
-│       │   │   └── common.py
-│       │   ├── services/                  # application use cases
-│       │   │   ├── portfolio_service.py
-│       │   │   ├── import_service.py
-│       │   │   ├── wallet_service.py
-│       │   │   ├── asset_service.py
-│       │   │   ├── pricing_service.py
-│       │   │   ├── activity_service.py
-│       │   │   ├── quality_service.py
-│       │   │   └── report_service.py
-│       │   ├── connectors/
-│       │   │   ├── base.py                # provider-neutral connector contracts
-│       │   │   ├── exchanges/
-│       │   │   │   └── csv/
-│       │   │   │       ├── base.py
-│       │   │   │       └── registry.py
-│       │   │   ├── blockchain/
-│       │   │   │   ├── solana.py
-│       │   │   │   └── evm.py
-│       │   │   └── market_data/
-│       │   │       ├── base.py
-│       │   │       └── coingecko.py
-│       │   ├── workflows/
-│       │   │   ├── import_workflow.py
-│       │   │   ├── wallet_sync_workflow.py
-│       │   │   └── portfolio_refresh_workflow.py
-│       │   ├── calculations/              # deterministic portfolio math
-│       │   │   ├── balances.py
-│       │   │   ├── valuation.py
-│       │   │   ├── allocation.py
-│       │   │   └── performance.py
-│       │   └── workers/
-│       │       └── jobs.py                # background refresh and import jobs
-│       ├── migrations/
-│       │   ├── env.py
-│       │   └── versions/                  # generated Alembic revisions
-│       ├── scripts/
-│       │   └── seed_demo_data.py
-│       └── tests/
-│           ├── conftest.py
-│           ├── unit/
-│           │   ├── test_calculations.py
-│           │   ├── test_asset_matching.py
-│           │   └── test_csv_parsers.py
-│           └── integration/
-│               ├── test_import_api.py
-│               └── test_portfolio_api.py
-├── packages/
-│   ├── config/                            # planned: shared TypeScript/lint settings
-│   │   ├── package.json
-│   │   ├── eslint.config.mjs
-│   │   └── tsconfig.base.json
-│   ├── types/                             # planned: shared API/domain TypeScript types
-│   │   ├── package.json
-│   │   └── src/
-│   │       ├── index.ts
-│   │       ├── asset.ts
-│   │       ├── portfolio.ts
-│   │       ├── source.ts
-│   │       └── activity.ts
-│   └── ui/                                # planned: shared accessible React primitives
-│       ├── package.json
-│       └── src/
-│           ├── index.ts
-│           ├── button.tsx
-│           ├── card.tsx
-│           ├── dialog.tsx
-│           └── badge.tsx
-└── docs/
-    ├── DESIGN.md                          # present: brand and UI design specification
-    ├── HACKATHON.md                       # present: event MVP and demo scope
-    ├── PROJECT_STRUCTURE.md               # present: this repository map
-    ├── ARCHITECTURE.md                    # planned: component and runtime boundaries
-    ├── API.md                              # planned: endpoint contracts
-    ├── CONNECTORS.md                       # planned: provider integration contracts
-    ├── DATA-MODEL.md                       # planned: entities and relationships
-    └── SECURITY.md                         # planned: threat model and security controls
-```
-
-This is the planned v1 repository map, not a promise that every future feature will land in the first release. Add a file when its owning feature is implemented; avoid creating placeholder modules for deferred product ideas.
+Runtime behavior and responsibilities are described below. Provider adapters and most account features exist only as extension points; check the status notes before connecting real data.
 
 ## Application boundaries
 
-| Area | Responsibility | Planned runtime |
+| Area | Responsibility | Runtime / target |
 |---|---|---|
 | `apps/web` | Public pages, account experience, portfolio UI, admin operations | Next.js, TypeScript, Tailwind CSS, Hugeicons; Vercel |
 | `apps/api` | Authentication, imports, wallet sync, normalized data, APIs, deterministic calculations | Python, FastAPI, Pydantic, SQLAlchemy, Alembic; Railway |
@@ -321,9 +276,9 @@ Import and refresh stages can report warnings without rejecting otherwise useful
 
 Portfolio balances, valuations, allocations, and historical calculations are computed by deterministic backend code. An optional PocketOrbit Guide can explain an already-computed result or terminology. It must not invent balances, prices, transactions, or tax claims, and it is not the calculation authority.
 
-## Main domain records
+## Current domain records
 
-The planned database model covers:
+The scaffolded SQLAlchemy models and initial migration cover:
 
 - **User and portfolio:** account identity, portfolio ownership, reporting currency, and preferences.
 - **Source:** wallet, imported file, or later provider connection; includes its type, label, network, and sync state.
@@ -335,20 +290,20 @@ The planned database model covers:
 
 Records that contribute to displayed values should carry relevant provenance fields: `source_type`, `source_name`, `source_record_id`, `retrieved_at`, `effective_at`, `asset_id`, `network_id`, `contract_address`, `quality_status`, `is_estimated`, `is_stale`, `match_confidence`, and `normalization_version`.
 
-## Connector responsibilities
+## Connector responsibilities and status
 
-Connectors translate external records to normalized PocketOrbit records. They do not calculate authoritative portfolio totals or set product-wide asset identity rules.
+Connectors translate external records to normalized PocketOrbit records. They do not calculate authoritative portfolio totals or set product-wide asset identity rules. Solana and EVM RPC balance reads and optional CoinGecko spot pricing are implemented for the stateless wallet snapshot; the generic CSV parser only previews rows.
 
 - **Exchange CSV parsers:** identify the statement format, validate rows, normalize transaction types, and report rejected or unmatched rows.
-- **Blockchain connectors:** retrieve public wallet balances, token metadata, and supported public activity for named networks. Initial targets are Solana and EVM-compatible networks.
-- **Market-data connectors:** return spot or historical prices and provider identifiers with retrieval times. CoinGecko is the initial example provider in the product notes.
+- **Blockchain connectors:** retrieve current public balances for Solana and EVM-compatible networks. Solana includes SPL and Token-2022 fungible balances; EVM includes native assets and only explicitly configured token contracts. Activity history is not yet implemented.
+- **Market-data connector:** optionally returns CoinGecko spot prices by asset ID and token contract or mint with provider timestamps. The API key and endpoint are configured server-side; unknown prices remain missing.
 - **Future exchange APIs:** if added, use the smallest available read-only permission set. Trading, withdrawal, and transfer permissions are out of scope.
 
 Each price record keeps its provider and retrieval time. There is no assumed universal crypto price; different providers or markets can report different values.
 
-## Planned product routes
+## Product routes
 
-These routes reflect the screen map in [DESIGN.md](DESIGN.md). They are target routes, not implemented routes.
+These routes reflect the screen map in [DESIGN.md](DESIGN.md). The scaffold includes a page for each route. Some pages are informational or placeholder screens; working data flows include the sample portfolio, CSV preview, demo export, and stateless live wallet snapshot API. The web wallet page and dashboard are not yet wired to the live snapshot endpoint.
 
 | Route | Purpose |
 |---|---|
@@ -377,7 +332,7 @@ The admin area is for platform operations. It must not expose credentials or sec
 
 ## Environment and deployment
 
-The planned deployment targets are Vercel for `apps/web`, Railway for `apps/api`, and NeonDB for PostgreSQL. `.env.example` should document variable names and safe local defaults only; real credentials belong in an untracked local environment or deployment secret store.
+The intended deployment targets are Vercel for `apps/web`, Railway for `apps/api`, and NeonDB for PostgreSQL. `.env.example` files document variable names and safe local defaults only; real credentials belong in an untracked local environment or deployment secret store. No deployment is configured by this scaffold.
 
 Likely environment settings include the API base URL, database connection URL, authentication/session settings, and provider credentials. Add provider keys only when the corresponding connector is implemented. Never commit real credentials.
 

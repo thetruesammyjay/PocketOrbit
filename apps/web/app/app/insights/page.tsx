@@ -1,0 +1,9 @@
+import { PageHeading } from "@/components/page-heading";
+import { getPortfolioSummary } from "@/features/portfolio/portfolio-api";
+import { formatCurrency } from "@/lib/format";
+
+export default async function InsightsPage() {
+  const portfolio = await getPortfolioSummary();
+  const stablecoin = portfolio.allocation.find((item) => item.name === "USDC");
+  return <><PageHeading title="Insights" description="Plain-language observations about the sample records." /><div className="demo-banner"><span aria-hidden="true">i</span><div><strong>Illustrative insights</strong>These observations are calculated from sample values, not live holdings.</div></div><div className="content-grid"><article className="panel content-panel"><span className="eyebrow">Allocation</span><h2 style={{ marginTop: "0.55rem" }}>Stablecoins are {stablecoin?.percentage.toFixed(1) ?? "0"}% of this sample.</h2><p>That is about {formatCurrency(stablecoin?.value ?? "0")} in the sample reporting currency.</p></article><article className="panel content-panel"><span className="eyebrow">Sources</span><h2 style={{ marginTop: "0.55rem" }}>{portfolio.sources.length} example sources are shown.</h2><p>In a connected portfolio, each balance would link back to its source and last refresh.</p></article><article className="panel content-panel"><span className="eyebrow">Data quality</span><h2 style={{ marginTop: "0.55rem" }}>No live provider data is available.</h2><p>Sample values cannot confirm the current balance or market price of any asset.</p></article><article className="panel content-panel"><span className="eyebrow">What changed</span><h2 style={{ marginTop: "0.55rem" }}>The sample portfolio has an illustrative 24-hour change.</h2><p>Real performance history will only be shown when timestamped snapshots are available.</p></article></div></>;
+}

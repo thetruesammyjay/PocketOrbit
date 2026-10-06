@@ -2,41 +2,56 @@
 
 > **Your crypto, in one clear view.**
 
-PocketOrbit is a read-only crypto portfolio companion. It brings assets from supported public wallets and exchange records into one portfolio view, then explains where the balances, prices, and activity came from.
+PocketOrbit is a read-only crypto portfolio companion. It brings records from public wallets and exchange files into one portfolio view, then shows where balances, prices, and activity came from.
 
 ## How PocketOrbit works
 
 ![Infographic: Add a public wallet or exchange file, organize the records, see the portfolio, and check where the information came from. PocketOrbit is read-only and never asks for private keys or seed phrases.](assets/PocketOrbit-Product-Flow.png)
 
-Add a public wallet address or upload an exchange statement. PocketOrbit brings the records together so you can see your balances, portfolio value, and activity in one place. You can check where each number came from and when it was last updated. PocketOrbit can read and organize your records, but it cannot move your crypto.
+Add a public wallet address or upload an exchange statement. PocketOrbit brings the records together so you can see balances, portfolio value, and activity in one place. You can check where each number came from and when it was last updated. PocketOrbit can read and organize records, but it cannot move your crypto.
 
-## The problem
+## What is scaffolded
 
-Crypto assets are spread across wallets, networks, and exchanges. Each service shows only part of the picture, and portfolio totals can hide stale prices, unmatched tokens, duplicated transfers, or incomplete history. PocketOrbit is designed to make those limits visible alongside the numbers.
+- A responsive Next.js web app with public pages, a sample portfolio dashboard, portfolio views, and admin route placeholders.
+- A FastAPI service with a health endpoint, deterministic sample portfolio, sample CSV preview/export, and stateless read-only wallet snapshots for configured Solana and EVM RPC endpoints.
+- Shared TypeScript types, UI primitives, SQLAlchemy models, calculation modules, and Alembic configuration.
+- Provider adapters for public wallet balances and market prices, with exchange CSV formats still at the generic preview stage.
 
-## What we are building
+**The dashboard still uses illustrative sample data.** CSV preview does not save records. The wallet API needs server-side RPC endpoints and a CoinGecko API key for live prices; EVM token coverage is limited to explicitly configured contracts. Wallet snapshots are not saved, and the web UI is not yet wired to them. Authentication, portfolio persistence, exchange-specific parsers, and protected admin access are not connected. See [API.md](docs/API.md) for wallet API configuration, [HACKATHON.md](docs/HACKATHON.md) for the MVP target, and [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for the full file map.
 
-PocketOrbit will let people combine supported portfolio sources and understand:
+## Run locally
 
-- what assets they track and where those assets are held;
-- the value of the tracked portfolio in a chosen reporting currency;
-- how balances and recorded activity change over time;
-- which sources, prices, and calculation times support each result;
-- which records are incomplete, stale, estimated, or awaiting review.
+Requirements: Node.js 20.9 or newer, pnpm, Python 3.11 or newer, and [uv](https://docs.astral.sh/uv/).
 
-PocketOrbit is read-only. It does not custody assets, execute trades, request private keys or seed phrases, or predict investment returns. Portfolio calculations are deterministic; optional explanations may describe calculated results but do not produce authoritative balances.
+From the repository root in PowerShell:
+
+```powershell
+if (-not (Test-Path apps/web/.env.local)) { Copy-Item apps/web/.env.example apps/web/.env.local }
+if (-not (Test-Path apps/api/.env)) { Copy-Item apps/api/.env.example apps/api/.env }
+pnpm install
+```
+
+Start the API in one terminal:
+
+```powershell
+pnpm dev:api
+```
+
+Start the web app in another terminal:
+
+```powershell
+pnpm dev
+```
+
+Open `http://localhost:3000`. The sample dashboard works without PostgreSQL or provider credentials. With the API running, the CSV page can preview a file locally and the reports page can download a clearly labeled sample CSV. Interactive API documentation is at `http://localhost:8000/docs`.
 
 ## Product principles
 
-- **Clear:** Explain crypto and portfolio terms in plain language.
+- **Clear:** Explain portfolio and crypto terms in plain language.
 - **Traceable:** Keep source and freshness information with important values.
-- **Read-only:** Use public addresses and imported records for the initial product.
-- **Honest:** Show missing, conflicting, stale, and uncertain data instead of hiding it.
-- **Global:** Keep native asset quantities separate from reporting-currency values and avoid assuming one country, currency, network, or tax regime.
-
-## Project status
-
-This repository currently contains the product and design documentation plus brand assets. The application implementation is planned; the target repository layout and responsibilities are documented in [Project Structure](docs/PROJECT_STRUCTURE.md).
+- **Read-only:** Never request a seed phrase, private key, or permission to move assets.
+- **Honest:** Label sample, missing, conflicting, stale, and uncertain information.
+- **Global:** Keep native asset quantities separate from reporting-currency values.
 
 ## Documentation
 
