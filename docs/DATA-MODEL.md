@@ -19,8 +19,8 @@ SQLAlchemy models live in `apps/api/app/models`. Alembic revisions in `apps/api/
 | `Price` | Provider price in a quote currency with retrieval timestamp. |
 | `ValuationSnapshot` | Calculated portfolio value, known subtotal, reporting currency, and calculation version. |
 | `ImportJob` | CSV fingerprint, source, status, filename, and accepted/rejected row counts. The uploaded file itself is not stored. |
-| `SyncJob` | Source refresh status for future background processing. |
-| `AuditEvent` | Operational event record for future protected administration. |
+| `SyncJob` | Recorded source refresh status and result. |
+| `AuditEvent` | Database-backed administrator page-access event with actor, page, and time. |
 | `RateLimitWindow` | Hashed subject and time-window request count shared by API replicas. |
 
 ## Provenance and quality

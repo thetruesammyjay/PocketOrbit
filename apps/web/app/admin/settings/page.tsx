@@ -1,2 +1,16 @@
-import { AdminFeaturePage } from "@/components/admin-feature-page";
-export default function Page() { return <AdminFeaturePage title="Admin settings" description="Operational configuration and access policy." />; }
+import { AdminDataPage } from "@/components/admin-data-page";
+
+export default function SettingsPage() {
+  return (
+    <AdminDataPage
+      title="Admin settings"
+      description="Safe configuration status; secret values are never returned."
+      endpoint="settings"
+      columns={[
+        { key: "name", label: "Setting" },
+        { key: "value", label: "Current value" },
+        { key: "configured", label: "Configured" }
+      ]}
+    />
+  );
+}

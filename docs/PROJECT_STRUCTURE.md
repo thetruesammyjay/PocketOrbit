@@ -351,7 +351,7 @@ Each price record keeps its provider and retrieval time. There is no assumed uni
 
 ## Product routes
 
-These routes reflect the screen map in [DESIGN.md](DESIGN.md). Account, portfolio, wallet source, import, and dashboard flows are connected. Admin routes are placeholders with a production email-allowlist gate; account settings, privacy, and terms remain placeholders or drafts and are not ready for public operations.
+These routes reflect the screen map in [DESIGN.md](DESIGN.md). Account, portfolio, wallet source, import, dashboard, and read-only admin operations are connected. Admin APIs require a signed-in allowlisted account and persist page-access events in `audit_events`; account settings, privacy, and terms remain placeholders or drafts and are not ready for public operations.
 
 | Route | Purpose |
 |---|---|

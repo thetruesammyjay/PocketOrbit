@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     auth_cookie_domain: str | None = None
     auth_cookie_samesite: str = "lax"
     auth_session_days: int = 14
+    admin_emails: str = ""
     max_request_body_bytes: int = 8 * 1024 * 1024
     trusted_proxy_cidrs: str = ""
     smtp_host: str | None = None
@@ -69,6 +70,15 @@ class Settings(BaseSettings):
             problems.append("DATABASE_URL must use PostgreSQL")
         if self.auth_session_days < 1 or self.auth_session_days > 30:
             problems.append("AUTH_SESSION_DAYS must be between 1 and 30")
+        admin_emails = [
+            address.strip().lower()
+            for address in self.admin_emails.split(",")
+            if address.strip()
+        ]
+        if not admin_emails or any("@" not in address for address in admin_emails):
+            problems.append(
+                "ADMIN_EMAILS must list one or more valid administrator email addresses"
+            )
         if self.max_request_body_bytes < 5 * 1024 * 1024 + 64 * 1024:
             problems.append("MAX_REQUEST_BODY_BYTES must allow a 5 MB CSV plus multipart overhead")
         if self.max_request_body_bytes > 64 * 1024 * 1024:

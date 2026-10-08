@@ -1,2 +1,17 @@
-import { AdminFeaturePage } from "@/components/admin-feature-page";
-export default function Page() { return <AdminFeaturePage title="System health" description="API and provider availability." />; }
+import { AdminDataPage } from "@/components/admin-data-page";
+
+export default function SystemPage() {
+  return (
+    <AdminDataPage
+      title="System health"
+      description="Database, schema, email, and provider configuration checks."
+      endpoint="system"
+      collection="checks"
+      columns={[
+        { key: "name", label: "Check" },
+        { key: "status", label: "Status" },
+        { key: "details", label: "Details" }
+      ]}
+    />
+  );
+}

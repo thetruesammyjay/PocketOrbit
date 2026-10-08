@@ -26,6 +26,10 @@ The FastAPI service uses `/api/v1`. Interactive API documentation is available a
 | `GET` | `/portfolios/{id}/imports` | List saved imports. |
 | `DELETE` | `/portfolios/{id}/imports/{import_id}` | Remove an import and its saved activity or balance snapshot. |
 | `GET` | `/reports/portfolios/{id}/holdings.csv` | Export the signed-in account's saved holdings with values, quality, sources, and update times. |
+| `GET` | `/admin/overview` | Admin-only account, portfolio, source, import, asset, and job counts. Records the page view. |
+| `GET` | `/admin/users`, `/admin/portfolios`, `/admin/imports`, `/admin/sources`, `/admin/assets`, `/admin/jobs` | Admin-only, paginated operational records. Wallet addresses are masked. |
+| `GET` | `/admin/system`, `/admin/settings` | Admin-only health checks and safe configuration status; secrets and endpoint URLs are not returned. |
+| `GET` | `/admin/audit` | Admin-only persisted admin page access events. |
 
 Every portfolio route checks ownership against the signed-in account. Mutating browser requests must come from the configured `WEB_ORIGIN` in production.
 
@@ -66,6 +70,7 @@ Set values in `apps/api/.env` for local development and use the deployment secre
 - `COINGECKO_API_KEY` and the optional base URL/header settings for asset prices.
 - In production, configured RPC and CoinGecko endpoints must use HTTPS; CoinGecko API keys are sent in the supported header, not in the base URL.
 - `DATABASE_URL` for PostgreSQL, a unique `SECRET_KEY` of at least 32 characters for session-token hashing, and `WEB_ORIGIN` for the exact web origin.
+- `ADMIN_EMAILS` in both web and API environments, as the same comma-separated list. Create each administrator through normal account registration and verify the email in production; there is no separate `ADMIN_PASSWORD` or password seeded into the database.
 - Browser API calls use the fixed same-origin path `/api/v1` through the Next.js proxy. Set `API_INTERNAL_URL` in the web environment to a server-reachable API base URL that includes `/api/v1`; the value is used by the Next.js proxy and server-rendered portfolio fetches. Set it during the web build and deployment. Keep the API auth cookie host-only (`AUTH_COOKIE_DOMAIN` blank) and use `AUTH_COOKIE_SAMESITE=lax`. This lets the browser store the API's session cookie under the web origin, and lets SSR forward that cookie to the API. Direct browser calls to an unrelated API host do not make a host-only cookie available to the web server.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM_EMAIL`, and `SMTP_SECURITY=starttls|ssl` for production verification and recovery email. If the server requires authentication, set both `SMTP_USERNAME` and `SMTP_PASSWORD` in the secret manager.
 

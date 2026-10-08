@@ -9,7 +9,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="admin-frame">
       <aside className="admin-sidebar">
         <Link className="brand-lockup" href="/admin" aria-label="PocketOrbit admin"><Image className="brand-logo" src="/brand/PocketOrbit-Logo.png" alt="PocketOrbit" width={2034} height={427} /></Link>
-        <p className="sample-note">Local scaffold only. Admin access control is not configured.</p>
+        <p className="sample-note">Read-only operations view. Admin page access is recorded for review.</p>
         <nav className="sidebar-nav" aria-label="Admin navigation">
           <Link className="sidebar-link" href="/admin">Overview</Link>
           {links.map((item) => <Link className="sidebar-link" href={`/admin/${item}`} key={item}>{item[0].toUpperCase() + item.slice(1)}</Link>)}
