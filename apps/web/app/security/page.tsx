@@ -1,13 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 const principles = [
-  ["Never share", "PocketOrbit will not ask for seed phrases, private keys, recovery words, or wallet signing access."],
-  ["No asset controls", "The product does not custody assets or execute trades, transfers, swaps, bridges, or withdrawals."],
-  ["Visible data sources", "Balances and prices are intended to show their source and retrieval time. Partial or stale information should be labeled."],
-  ["Know what is ready", "Authentication, storage, and provider security controls are not configured in this starter yet."]
+  ["Keep your keys", "PocketOrbit will not ask for seed phrases, private keys, recovery words, or wallet signing access."],
+  ["Keep control of your assets", "The product does not custody assets or execute trades, transfers, swaps, bridges, or withdrawals."],
+  ["Check the information", "Balances and prices are intended to show their source and retrieval time. Partial or stale information should be labeled."],
+  ["Know what is ready", "Production accounts require verified email. Password reset links are single-use, sessions can be revoked, account actions are rate-limited, and portfolio access checks ownership."]
 ];
 
 export default function SecurityPage() {
@@ -15,16 +16,19 @@ export default function SecurityPage() {
     <>
       <SiteHeader />
       <main className="page-container section-space detail-page">
-        <section className="feature-intro feature-intro--plain">
-          <div>
+        <section className="marketing-subpage-hero">
+          <div className="marketing-subpage-copy">
             <span className="badge badge--success">Read-only by design</span>
             <h1 className="page-title">Your keys stay with you.</h1>
-            <p className="body-copy">PocketOrbit is a portfolio companion, not a wallet. It is designed around public addresses and files you choose to import.</p>
+            <p className="body-copy">PocketOrbit is a portfolio companion built around public addresses and files you choose to import. It never needs the power to move your crypto.</p>
+            <Link className="button button--secondary" href="/how-it-works">See how it works</Link>
           </div>
-          <div className="security-orbit" aria-hidden="true"><span /><span /><span /></div>
+          <div className="marketing-subpage-art marketing-subpage-art--security">
+            <Image src="/illustrations/read-only-orbit.svg" alt="Read-only shield with public address and file symbols" width={560} height={350} priority />
+          </div>
         </section>
 
-        <div className="content-grid security-grid">
+        <div className="content-grid security-grid marketing-security-grid">
           {principles.map(([title, body]) => (
             <section className="panel content-panel" key={title}>
               <span className="security-mark" aria-hidden="true" />
@@ -34,7 +38,7 @@ export default function SecurityPage() {
           ))}
         </div>
 
-        <div className="detail-note"><strong>This is an early scaffold.</strong><p>Live connections and account features are not configured. The sample portfolio uses illustrative values only.</p><Link className="text-link" href="/app">Explore the sample portfolio</Link></div>
+        <div className="detail-note"><strong>Production operations are still being completed.</strong><p>The sample portfolio uses illustrative values. Production still needs configured email delivery, protected admin access, backups and restore drills, monitoring, retention rules, and reviewed legal policies.</p><Link className="text-link" href="/app">Explore the sample portfolio</Link></div>
       </main>
       <SiteFooter />
     </>

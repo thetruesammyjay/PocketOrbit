@@ -1,43 +1,47 @@
 # Architecture
 
-PocketOrbit separates source adapters, record normalization, deterministic calculations, persistence, and presentation. The API owns data interpretation and portfolio math; the web app renders the result and its provenance.
+PocketOrbit separates provider reads, validation and normalization, portfolio calculations, persistence, and presentation. The API owns source interpretation and portfolio aggregation. The web app renders saved results with their provenance and quality labels.
 
 ```text
-Public wallet / exchange file / price provider
+Public wallet / exchange CSV / price provider
                     ↓
-       Read-only RPC connector or CSV parser
+        RPC connector or CSV normalizer
                     ↓
-         Validation and normalization
+       Validate identity and normalize rows
                     ↓
-       Asset identity and activity review
+     Save sources, balances, and transactions
                     ↓
-        Deterministic portfolio engine
+          Calculate values and quality
                     ↓
-       FastAPI API with live provider reads
+           FastAPI portfolio API
                     ↓
-         Next.js web application
+          Next.js web application
 ```
 
 ## Services
 
-- `apps/web`: Next.js App Router frontend, TypeScript, Tailwind CSS 4, and Hugeicons. Intended hosting target: Vercel.
-- `apps/api`: FastAPI service with Pydantic contracts, SQLAlchemy models, and Alembic migrations. Intended hosting target: Railway.
-- PostgreSQL: planned persistent store; NeonDB is the intended managed provider.
-- `packages/types`: shared browser-side domain types.
-- `packages/ui`: shared React primitives. Product screens own composition and data behavior.
+- `apps/web`: Next.js App Router frontend, TypeScript, and shared UI components.
+- `apps/api`: FastAPI service with Pydantic contracts, SQLAlchemy models, and Alembic migrations.
+- PostgreSQL: accounts, portfolios, source records, snapshots, transactions, prices, and import history.
+- `packages/types`: shared TypeScript API and domain types.
+- `packages/ui`: shared React UI primitives.
 
-## Calculation boundary
+## Current data flow
 
-The API calculates balances, values, allocations, and performance from normalized records and selected price inputs. It must preserve the price provider and retrieval time used for each result. Optional AI explanations may describe verified results but do not calculate authoritative values.
+- Browser users register or sign in. The API issues an opaque HttpOnly session cookie and stores only an HMAC of its token in PostgreSQL.
+- Login, registration, wallet refresh, and CSV operations update atomic fixed-window rate counters in PostgreSQL. Hashed rate-limit keys work across API replicas; development without a database uses a local-only fallback.
+- Each account owns its portfolios. Every portfolio API operation checks that ownership.
+- Adding a public wallet saves the source first, then reads the supported chain through a configured RPC endpoint and resolves available prices. Successful reads save a wallet snapshot and portfolio valuation; failed reads keep the source marked offline without creating a fake snapshot, so the user can retry it later. Refreshing a saved wallet appends another snapshot and records a completed or failed sync job. Users can remove the wallet source and its saved history.
+- CSV preview suggests column mappings without storing the upload. Transaction-history imports save normalized activity; current-balance imports save a balance snapshot. Both validate mapped rows, store a file fingerprint, and discard the original file. A saved import can be removed and imported again with a corrected mapping.
+- The portfolio API calculates current holdings from saved wallet snapshots and current-balance CSV snapshots. Imported balance statements remain marked for review and keep the portfolio total partial. Transaction-history rows appear separately as activity and are never treated as current balances, because an incomplete ledger cannot establish what an account holds now.
+- The web dashboard reads the authenticated portfolio through Next.js server-side requests. Unauthenticated visitors see an explicitly labeled sample portfolio.
 
-## Current API behavior
+## Provider boundaries and quality
 
-- The overview uses illustrative fixture data, either from the demo API endpoint or a local fallback.
-- `GET /api/v1/health` works without PostgreSQL.
-- `GET /api/v1/portfolios/demo/summary` returns a deterministic fixture response.
-- `POST /api/v1/imports/preview` previews CSV headings and sample rows. It does not save or normalize records.
-- `POST /api/v1/wallets/sync` reads a public address through configured RPC and attaches optional CoinGecko pricing and provenance. It is stateless and does not persist the address or snapshot.
-- Solana token balances are read from the standard token programs. EVM reads cover the native coin and configured ERC-20 contracts only; arbitrary token discovery is not supported by plain EVM JSON-RPC.
-- Authentication and administrative authorization are not configured.
+Solana reads native SOL and fungible SPL / Token-2022 balances. EVM reads native assets and prefers indexed `alchemy_getTokenBalances` methods, while preserving configured RPCs for standard chain reads. If that method is unavailable and an Alchemy key is configured, the metadata-enabled Portfolio API supplies ERC-20 balances and can also provide native balances when chain RPC reads fail. The response records the source and marks partial provider results. NFTs, DeFi positions, complete chain activity, and direct exchange API connections are not implemented.
 
-The web overview still uses labeled fixture data until it is connected to the live wallet endpoint. Do not treat demo data as live wallet data or current market prices. Before public deployment, add authentication and stronger per-user API limits for wallet lookups.
+CoinGecko pricing uses exact supported network and contract identity. Ticker-only CSV assets are not looked up by symbol. The API includes source timestamps and data quality; snapshots older than 24 hours are marked delayed. Optional AI explanations may describe computed results but must not calculate authoritative balances or prices.
+
+## Deployment boundary
+
+Production configuration requires HTTPS `WEB_ORIGIN`, PostgreSQL, a unique 32-character `SECRET_KEY`, valid session-cookie settings, and a request-body limit large enough for supported CSV imports. Forwarded IP headers are trusted only from configured proxy CIDRs. Run Alembic migrations as a release step. `/api/v1/health` is process liveness; `/api/v1/ready` checks database connectivity and schema revision. See [`API.md`](API.md) and [`SECURITY.md`](SECURITY.md) for current launch blockers. No production deployment is configured in this repository.

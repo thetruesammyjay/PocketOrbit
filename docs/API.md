@@ -1,55 +1,82 @@
 # PocketOrbit API
 
-Base path: `/api/v1`. Interactive FastAPI documentation is available at `/docs` while the API is running.
+The FastAPI service uses `/api/v1`. Interactive API documentation is available at `/docs` while the service is running.
 
-| Method | Path | Current behavior |
+## Account and portfolio routes
+
+| Method | Route | Purpose |
 |---|---|---|
-| `GET` | `/health` | Returns process status, environment, and whether a database URL is configured. |
-| `GET` | `/portfolios/demo/summary` | Returns an explicitly illustrative portfolio summary. |
-| `GET` | `/sources/demo` | Returns the sample sources shown in the demo portfolio. |
-| `POST` | `/imports/preview` | Reads a CSV header and up to five rows; max file size is 5 MB; never persists the upload. |
-| `GET` | `/wallets/capabilities` | Reports which read-only RPC networks and market-price provider are configured. |
-| `POST` | `/wallets/sync` | Fetches one current public-wallet snapshot, values known assets, and returns provenance. The address and results are not persisted. |
-| `GET` | `/reports/demo/holdings.csv` | Downloads a CSV explicitly labeled as illustrative sample data. |
-| `GET` | `/admin/status` | Reports that authentication and live admin services are not configured. |
+| `POST` | `/auth/register` | Create an account and default portfolio; production accounts verify email before sign-in. |
+| `POST` | `/auth/login` | Sign in and issue an HttpOnly session cookie. |
+| `POST` | `/auth/verification/resend` | Request an email verification link without revealing whether an account exists. |
+| `POST` | `/auth/verification/confirm` | Consume a one-time email verification link. |
+| `POST` | `/auth/password/forgot` | Request a one-time password reset link. |
+| `POST` | `/auth/password/reset` | Set a new password and revoke existing sessions. |
+| `POST` | `/auth/account/delete` | Confirm the password and permanently remove the account's active data. |
+| `POST` | `/auth/logout` | Revoke the current session and clear its cookie. |
+| `GET` | `/auth/me` | Return the signed-in account. |
+| `GET` | `/portfolios` | List the signed-in account's portfolios. |
+| `POST` | `/portfolios` | Create a portfolio. |
+| `GET` | `/portfolios/{id}/summary` | Load persisted holdings, history, sources, activity, and data quality. |
+| `GET` | `/portfolios/{id}/sources` | List saved wallet and import sources. |
+| `POST` | `/portfolios/{id}/sources/wallets` | Read and save a public wallet and its first snapshot. |
+| `POST` | `/portfolios/{id}/sources/{source_id}/sync` | Refresh a saved wallet and append a snapshot. |
+| `DELETE` | `/portfolios/{id}/sources/{source_id}` | Remove a saved wallet source and its balance snapshots. |
+| `POST` | `/portfolios/{id}/imports` | Validate and save CSV transaction history or a current balance statement. The file itself is discarded. |
+| `GET` | `/portfolios/{id}/imports` | List saved imports. |
+| `DELETE` | `/portfolios/{id}/imports/{import_id}` | Remove an import and its saved activity or balance snapshot. |
+| `GET` | `/reports/portfolios/{id}/holdings.csv` | Export the signed-in account's saved holdings with values, quality, sources, and update times. |
 
-## Contracts
+Every portfolio route checks ownership against the signed-in account. Mutating browser requests must come from the configured `WEB_ORIGIN` in production.
 
-The TypeScript shapes are in `packages/types/src`. Pydantic response models are in `apps/api/app/schemas`. Keep API response fields stable and preserve provenance and quality status when a response is extended.
+Production registration sends a 24-hour verification link and does not create a session until the email is verified. Password reset links expire after 30 minutes and can be used once. Both token types are stored as keyed hashes, and password changes revoke all active sessions. Development accounts are verified immediately so local work does not require an SMTP service.
 
-### Live wallet snapshot
+## Wallet data
 
-Example request:
+Supported network IDs are `solana`, `ethereum`, `base`, and `arbitrum`. The wallet flow reads public addresses only. It does not request keys or sign transactions.
 
-```json
-{
-  "network": "solana",
-  "address": "<public-address>",
-  "quoteCurrency": "USD"
-}
-```
+`POST /portfolios/{id}/sources/wallets` saves the wallet source before its first provider read. A successful read saves each returned balance, a timestamped snapshot, and available price provenance. If the provider is unavailable, the source remains connected with `offline` quality and no fabricated snapshot; retry it through the saved-source sync route. Later successful syncs append snapshots instead of overwriting history. Sync attempts are recorded as completed or failed jobs. `GET /wallets/capabilities` reports configured networks without exposing RPC URLs or credentials. `POST /wallets/sync` remains available for a non-persistent one-time read.
 
-Supported network IDs are `solana`, `ethereum`, `base`, and `arbitrum`. Responses include the coverage class, balance source, retrieval time, block or slot reference when available, price source and provider update time, per-asset quality, warnings, and a `knownValue`. `totalValue` is `null` when coverage or pricing is incomplete; the API does not present a partial sum as a complete portfolio total.
+Solana reads native SOL and fungible SPL / Token-2022 balances. EVM reads the native coin and first tries the indexed RPC method `alchemy_getTokenBalances`. If that method is unavailable, it uses Alchemy's metadata-enabled Portfolio API when `ALCHEMY_API_KEY` is configured; if chain RPC reads also fail, the Portfolio API can provide native and ERC-20 balances. Otherwise, `auto` mode falls back to explicitly configured ERC-20 contracts. Set `EVM_TOKEN_DISCOVERY=alchemy` to require indexed discovery, or `configured_only` to disable it. Indexed discovery inspects at most 200 positive-balance contracts and 10 pages per sync, stopping as soon as a page proves the 200-token cap was exceeded. At most eight token reads run concurrently. Additional positive balances, later pages, values outside the stored quantity precision (20 whole digits and 18 decimal places), and individual token balances that cannot be normalized are omitted; the snapshot is marked partial and `totalValue` is withheld. NFTs, DeFi positions, exchange API connections, and full chain transaction indexing are outside the current connector coverage.
 
-Solana reads include native SOL and SPL / Token-2022 fungible token accounts. EVM reads include the native coin and only ERC-20 contracts explicitly configured for that network. Standard EVM JSON-RPC cannot enumerate arbitrary token contracts. NFTs, DeFi positions, activity history, portfolio aggregation, and persistence are not part of this endpoint yet.
+The response separates `knownValue` from `totalValue`. `totalValue` is `null` when token coverage or pricing is incomplete. Prices include the provider, provider update time, retrieval time, and quality when available. Prices older than ten minutes are marked delayed; wallet snapshots older than 24 hours are marked delayed. Unknown or missing data is not silently counted as zero.
 
-The endpoint only performs public read calls. It does not store wallet addresses, balances, or prices and cannot sign transactions. Provider API keys stay in the API environment and are never returned to the browser.
+## CSV imports
 
-### Provider configuration
+`POST /imports/preview` reads a CSV header and up to five rows, suggests column mappings, and does not save data. `POST /portfolios/{id}/imports` requires authentication and accepts `mode=transactions` (the default) or `mode=balances`. Transaction history maps date, asset, and quantity; transaction type is needed when a file uses unsigned amounts. A current balance statement maps asset and quantity, with optional network and contract/mint columns. Files are limited to 5 MB, 20,000 rows, and 256 columns.
 
-Set provider values in `apps/api/.env`:
+Balance statements are attached to a named account source. Select that source on later imports to append a new snapshot; the portfolio summary uses only its latest snapshot, while history remains available. Removing an import removes only its snapshot; removing the final import also removes that source. A duplicate account name must select the existing source instead of creating a second balance source.
+
+Transaction mode stores normalized rows and shows them as activity. It does not infer current holdings from a possibly incomplete ledger. Balance mode saves a timestamped balance snapshot and shows the quantities as holdings; these are user-provided, marked `needs_review`, and do not produce a complete portfolio total. For exact token pricing, map the supported network and contract or mint; ticker-only rows stay unmatched and unpriced. Both modes store a SHA-256 file fingerprint and discard the original upload. Duplicate files are blocked until the saved import is removed. The API's configured body cap rejects oversized multipart requests before parsing.
+
+Both import modes report accepted and rejected rows, up to 100 row-level rejection reasons, unmatched symbols, and warnings. Users can remove an import, which deletes its saved activity or balance snapshot and allows a corrected re-import.
+
+The import response includes accepted and rejected row counts, up to 100 row-level rejection reasons, unmatched symbols, and warnings. Users can remove an import to correct a mapping and re-import it.
+
+## Provider configuration
+
+Set values in `apps/api/.env` for local development and use the deployment secret manager in production. Production startup requires at least one public wallet RPC endpoint, indexed EVM RPC endpoint, or `ALCHEMY_API_KEY`; unsupported or missing wallet providers are reported through `/wallets/capabilities` and sync responses.
 
 - `SOLANA_RPC_URL` for Solana mainnet RPC.
-- `ETHEREUM_RPC_URL` or the legacy `EVM_RPC_URL` for Ethereum. Set `BASE_RPC_URL` and `ARBITRUM_RPC_URL` separately for those networks. EVM endpoints are checked against their expected chain ID.
-- `*_TOKEN_CONTRACTS` as comma-separated, explicitly selected ERC-20 contract addresses per EVM network. Up to 30 addresses per network are read.
-- `COINGECKO_API_KEY` for USD or another supported quote currency. Demo API is the default; for a Pro key, set `COINGECKO_API_BASE_URL` and `COINGECKO_API_KEY_HEADER` to the Pro endpoint and header.
+- `ETHEREUM_RPC_URL`, `BASE_RPC_URL`, and `ARBITRUM_RPC_URL` for those networks. `EVM_RPC_URL` remains an Ethereum fallback. EVM endpoints are checked against the expected chain ID.
+- `ETHEREUM_INDEXED_RPC_URL`, `BASE_INDEXED_RPC_URL`, and `ARBITRUM_INDEXED_RPC_URL` optionally set per-network RPC endpoints for indexed token methods. These take precedence for discovery and are tried as a chain-read fallback; they must support `eth_chainId` and `alchemy_getTokenBalances`, and the API verifies the chain ID before accepting balances. Token metadata is optional and falls back to ERC-20 contract reads. If used as a chain-read fallback, the endpoint must also support standard EVM RPC methods.
+- `ALCHEMY_API_KEY` optionally supplies dedicated Alchemy Token API endpoints for Ethereum, Base, and Arbitrum, and enables the metadata-enabled Portfolio API fallback. A per-network indexed RPC URL overrides the generated Alchemy endpoint for that network. Existing chain RPC URLs remain primary for chain ID, native balances, and standard contract calls; the indexed endpoint is tried as fallback if a chain-ID check fails. Portfolio API balances are timestamped but are not pinned to the EVM block read by a separate RPC.
+- `*_TOKEN_CONTRACTS` for comma-separated ERC-20 contracts used in configured-only mode or automatic-discovery fallback.
+- `EVM_TOKEN_DISCOVERY=auto|alchemy|configured_only` to select token discovery behavior. `auto` tries indexed RPC, then the Alchemy Portfolio API when configured, then configured contracts; `alchemy` fails the wallet sync if indexed discovery is unavailable; `configured_only` disables indexed discovery. Provider method support is checked during sync.
+- `COINGECKO_API_KEY` and the optional base URL/header settings for asset prices.
+- In production, configured RPC and CoinGecko endpoints must use HTTPS; CoinGecko API keys are sent in the supported header, not in the base URL.
+- `DATABASE_URL` for PostgreSQL, a unique `SECRET_KEY` of at least 32 characters for session-token hashing, and `WEB_ORIGIN` for the exact web origin.
+- Browser API calls use the fixed same-origin path `/api/v1` through the Next.js proxy. Set `API_INTERNAL_URL` in the web environment to a server-reachable API base URL that includes `/api/v1`; the value is used by the Next.js proxy and server-rendered portfolio fetches. Set it during the web build and deployment. Keep the API auth cookie host-only (`AUTH_COOKIE_DOMAIN` blank) and use `AUTH_COOKIE_SAMESITE=lax`. This lets the browser store the API's session cookie under the web origin, and lets SSR forward that cookie to the API. Direct browser calls to an unrelated API host do not make a host-only cookie available to the web server.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM_EMAIL`, and `SMTP_SECURITY=starttls|ssl` for production verification and recovery email. If the server requires authentication, set both `SMTP_USERNAME` and `SMTP_PASSWORD` in the secret manager.
 
-`GET /wallets/capabilities` reports configuration presence only; it never returns endpoint URLs or keys.
+`GET /health` is a liveness check. `GET /ready` returns `503` until the database is reachable and its Alembic revision matches the application head. Apply migrations as a deployment release step before routing application traffic.
 
-## Error behavior
+## Request limits
 
-Use status codes that explain the failure: `413` for an oversized preview file, `415` for a non-CSV upload, `422` for an invalid address, `502` when the blockchain RPC cannot return balances, and `503` when that RPC is not configured. If the optional price provider fails, return the live balance snapshot with missing prices and a warning. Do not expose stack traces, credentials, or provider secrets in user-facing messages.
+Authentication, wallet refresh, and CSV actions use shared fixed-window counters in PostgreSQL. Limits are keyed by hashed account, email, or client IP values; raw identifiers are not stored in the counter table. Rejected requests return `429` and a `Retry-After` header. A limiter database error returns `503` rather than allowing an uncounted request. Development without a database uses an in-process fallback and does not provide cross-worker protection.
 
-## Future API work
+The API rejects request bodies over `MAX_REQUEST_BODY_BYTES` before parsing them. The default is 8 MiB. Keep this above 5 MiB plus multipart overhead so valid CSV imports fit. `TRUSTED_PROXY_CIDRS` accepts comma-separated CIDR ranges. Set it only to reverse proxies that sanitize or append `X-Forwarded-For`; otherwise forwarded values are ignored. Also configure edge request, connection, and concurrency limits in the hosting platform.
 
-Authentication, portfolio CRUD and aggregation, persistent import jobs, transaction history, and admin operations remain future work. The wallet snapshot is a live, stateless preview rather than an authenticated or saved account source. Do not present stub or demo responses as account data.
+## Current launch limitations
+
+This implementation provides persistent accounts, sources, wallet snapshots, CSV transaction history, shared API rate limits, a request-body cap, email verification, password recovery, and account deletion. Before opening registration to the public, set up backup and restore procedures, monitoring, incident response, and retention policies. The app does not yet calculate explainable cost basis or realized/unrealized P&L, reconcile internal transfers, or guarantee a complete exchange transaction history.

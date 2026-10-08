@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 350" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Illustrative portfolio value with source, freshness, and quality details</title>
+  <rect width="560" height="350" rx="28" fill="#EFECFF"/>
+  <circle cx="94" cy="269" r="80" stroke="#CFC9FA" stroke-width="2" stroke-dasharray="5 9"/>
+  <circle cx="479" cy="67" r="52" stroke="#CFC9FA" stroke-width="2" stroke-dasharray="5 9"/>
+  <rect x="113" y="38" width="334" height="273" rx="25" fill="#FFFFFF" stroke="#D9D4F9" stroke-width="2"/>
+  <text x="142" y="80" fill="#7B7E87" font-family="Arial,sans-serif" font-size="15" font-weight="600">Portfolio value · sample</text>
+  <text x="142" y="131" fill="#131419" font-family="Arial,sans-serif" font-size="36" font-weight="700">$31,686.37</text>
+  <path d="M142 153h276" stroke="#E3E4DE" stroke-width="2"/>
+  <circle cx="154" cy="184" r="8" fill="#6C5CE7"/>
+  <text x="175" y="189" fill="#41434A" font-family="Arial,sans-serif" font-size="14">Source</text>
+  <text x="336" y="189" fill="#131419" font-family="Arial,sans-serif" font-size="14" font-weight="700">3 records</text>
+  <circle cx="154" cy="225" r="8" fill="#56B7FF"/>
+  <text x="175" y="230" fill="#41434A" font-family="Arial,sans-serif" font-size="14">Updated</text>
+  <text x="328" y="230" fill="#131419" font-family="Arial,sans-serif" font-size="13" font-weight="700">Sample</text>
+  <circle cx="154" cy="266" r="8" fill="#FFC857"/>
+  <text x="175" y="271" fill="#41434A" font-family="Arial,sans-serif" font-size="14">Quality</text>
+  <rect x="333" y="249" width="88" height="29" rx="14.5" fill="#FFF6D9"/>
+  <text x="340" y="268" fill="#785900" font-family="Arial,sans-serif" font-size="12" font-weight="700">Estimated</text>
+  <circle cx="65" cy="88" r="13" fill="#56B7FF"/>
+  <path d="m485 252 7 16 16 7-16 7-7 16-7-16-16-7 16-7 7-16Z" fill="#6C5CE7"/>
+</svg>

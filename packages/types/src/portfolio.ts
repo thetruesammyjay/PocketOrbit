@@ -14,11 +14,13 @@ export interface PortfolioSummary {
   name: string;
   isDemo: boolean;
   reportingCurrency: string;
-  totalValue: string;
-  change24h: string;
-  changePercent24h: string;
+  totalValue: string | null;
+  knownValue: string;
+  change24h: string | null;
+  changePercent24h: string | null;
   calculatedAt: string;
   quality: QualityStatus;
+  warnings: string[];
   holdings: Holding[];
   sources: PortfolioSource[];
   allocation: AllocationItem[];

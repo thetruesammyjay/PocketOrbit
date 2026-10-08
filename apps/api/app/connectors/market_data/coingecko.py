@@ -66,7 +66,9 @@ class CoinGeckoConnector(MarketDataConnector):
             "x-cg-demo-api-key",
             "x-cg-pro-api-key",
         }:
-            raise ProviderNotConfiguredError("The configured CoinGecko API key type is not supported.")
+            raise ProviderNotConfiguredError(
+                "The configured CoinGecko API key type is not supported."
+            )
 
         headers = {settings.coingecko_api_key_header: api_key}
         url = f"{settings.coingecko_api_base_url.rstrip('/')}/{path.lstrip('/')}"
@@ -78,9 +80,17 @@ class CoinGeckoConnector(MarketDataConnector):
             payload = response.json()
         except ProviderRequestError:
             raise
-        except (httpx.HTTPError, ValueError) as exc:
-            # Do not include exception text; request headers contain the provider key.
-            raise ProviderRequestError("CoinGecko could not return a price response.") from exc
+        except httpx.HTTPStatusError as exc:
+            raise ProviderRequestError(
+                f"CoinGecko returned HTTP {exc.response.status_code}."
+            ) from None
+        except httpx.TimeoutException:
+            raise ProviderRequestError("The CoinGecko request timed out.") from None
+        except httpx.HTTPError:
+            # Suppress transport details because request metadata can contain provider data.
+            raise ProviderRequestError("CoinGecko could not return a price response.") from None
+        except ValueError:
+            raise ProviderRequestError("CoinGecko returned invalid JSON.") from None
         if not isinstance(payload, dict):
             raise ProviderRequestError("CoinGecko returned an invalid price response.")
         return payload
@@ -100,24 +110,27 @@ class CoinGeckoConnector(MarketDataConnector):
         currency = quote_currency.lower()
         warnings: list[str] = []
         quotes: dict[str, MarketPrice] = {}
-        try:
-            native_payload = await self._get_json(
-                client,
-                "simple/price",
-                {
-                    "ids": network.native_price_id,
-                    "vs_currencies": currency,
-                    "include_last_updated_at": "true",
-                },
-            )
-            native_retrieved_at = datetime.now(UTC)
-            native_quote = _quote(native_payload.get(network.native_price_id), currency, native_retrieved_at)
-            if native_quote:
-                for balance in balances:
-                    if balance.contract_address is None:
-                        quotes[balance.asset_id] = native_quote
-        except (ProviderNotConfiguredError, ProviderRequestError):
-            warnings.append("The native asset price could not be retrieved.")
+        if any(balance.contract_address is None for balance in balances):
+            try:
+                native_payload = await self._get_json(
+                    client,
+                    "simple/price",
+                    {
+                        "ids": network.native_price_id,
+                        "vs_currencies": currency,
+                        "include_last_updated_at": "true",
+                    },
+                )
+                native_retrieved_at = datetime.now(UTC)
+                native_quote = _quote(
+                    native_payload.get(network.native_price_id), currency, native_retrieved_at
+                )
+                if native_quote:
+                    for balance in balances:
+                        if balance.contract_address is None:
+                            quotes[balance.asset_id] = native_quote
+            except (ProviderNotConfiguredError, ProviderRequestError):
+                warnings.append("The native asset price could not be retrieved.")
 
         token_balances = [balance for balance in balances if balance.contract_address]
         if token_balances:

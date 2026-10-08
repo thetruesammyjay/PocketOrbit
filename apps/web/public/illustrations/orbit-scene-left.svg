@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 620" fill="none" role="img" aria-labelledby="title">
+  <title id="title">PocketOrbit orbital shapes with a public wallet card</title>
+  <circle cx="191" cy="315" r="180" fill="#F0F1EC"/>
+  <circle cx="191" cy="315" r="130" stroke="#DCDDD8" stroke-width="2" stroke-dasharray="5 12"/>
+  <path d="M5 450C117 515 346 518 481 393" stroke="#DCDDD8" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="97" cy="118" r="39" fill="#FFC857"/>
+  <path d="M62 130c16 4 40 2 66-15" stroke="#D89E28" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="392" cy="455" r="22" fill="#56B7FF"/>
+  <circle cx="438" cy="141" r="9" fill="#18C98B"/>
+  <circle cx="35" cy="292" r="8" fill="#6C5CE7"/>
+  <path d="m364 84 8 18 19 7-19 7-8 18-7-18-19-7 19-7 7-18Z" fill="#6C5CE7"/>
+  <path d="m51 527 6 13 14 5-14 6-6 14-5-14-14-6 14-5 5-13Z" fill="#FFC857"/>
+  <g transform="rotate(-11 236 321)">
+    <rect x="112" y="225" width="245" height="178" rx="28" fill="#FFFFFF" stroke="#131419" stroke-width="3"/>
+    <rect x="137" y="252" width="52" height="52" rx="17" fill="#EFECFF"/>
+    <path d="M154 271h18a8 8 0 0 1 0 16h-18a8 8 0 0 1 0-16Zm19 5h-6" stroke="#6C5CE7" stroke-width="4" stroke-linecap="round"/>
+    <rect x="207" y="258" width="110" height="11" rx="5.5" fill="#D9DAD5"/>
+    <rect x="207" y="279" width="71" height="9" rx="4.5" fill="#E9EAE6"/>
+    <path d="M138 328h191" stroke="#E3E4DE" stroke-width="2"/>
+    <circle cx="154" cy="353" r="7" fill="#18C98B"/>
+    <rect x="172" y="347" width="91" height="11" rx="5.5" fill="#41434A"/>
+    <rect x="277" y="347" width="48" height="11" rx="5.5" fill="#E3E4DE"/>
+    <text x="137" y="386" fill="#7B7E87" font-family="Arial,sans-serif" font-size="13" font-weight="600">Public address</text>
+  </g>
+  <path d="M454 298c-12-13-28-13-40 0m-13-12c20-24 46-24 65 0" stroke="#56B7FF" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="435" cy="316" r="6" fill="#56B7FF"/>
+</svg>

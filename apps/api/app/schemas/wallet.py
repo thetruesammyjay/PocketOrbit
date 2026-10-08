@@ -42,9 +42,7 @@ class WalletSyncRequest(CamelModel):
         network = info.data.get("network")
         if network == "solana" and not _is_solana_public_key(value):
             raise ValueError("Enter a valid Solana public address.")
-        if network in {"ethereum", "base", "arbitrum"} and not EVM_ADDRESS_PATTERN.fullmatch(
-            value
-        ):
+        if network in {"ethereum", "base", "arbitrum"} and not EVM_ADDRESS_PATTERN.fullmatch(value):
             raise ValueError("Enter a valid EVM public address, starting with 0x.")
         return value
 
@@ -78,6 +76,7 @@ class LiveWalletBalance(CamelModel):
     network: str
     contract_address: str | None = None
     quantity: Decimal
+    decimals: int
     quote_currency: str
     unit_price: Decimal | None = None
     value: Decimal | None = None
@@ -90,12 +89,16 @@ class WalletSyncResponse(CamelModel):
     network: str
     network_name: str
     coverage: Literal[
+        "not_synced",
         "native_and_spl_token2022_fungible_balances",
         "native_and_configured_erc20_balances",
+        "native_and_indexed_erc20_balances",
     ]
     address: str
-    is_live: Literal[True] = True
-    is_persisted: Literal[False] = False
+    is_live: bool = True
+    is_persisted: bool = False
+    source_id: str | None = None
+    snapshot_id: str | None = None
     retrieved_at: datetime
     quote_currency: str
     total_value: Decimal | None = None

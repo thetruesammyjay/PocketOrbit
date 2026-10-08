@@ -1,4 +1,13 @@
-export function PortfolioChart({ values }: { values: number[] }) {
+export function PortfolioChart({
+  values,
+  sample = false
+}: {
+  values: number[];
+  sample?: boolean;
+}) {
+  const description = sample
+    ? "Illustrative sample portfolio value trend"
+    : "Saved portfolio value history";
   const min = Math.min(...values);
   const max = Math.max(...values);
   const spread = max - min || 1;
@@ -10,8 +19,8 @@ export function PortfolioChart({ values }: { values: number[] }) {
   const last = points[points.length - 1]?.split(",") ?? ["392", "26"];
 
   return (
-    <svg className="portfolio-chart" viewBox="0 0 400 118" role="img" aria-label="Illustrative sample portfolio value trend">
-      <title>Illustrative sample portfolio value trend</title>
+    <svg className="portfolio-chart" viewBox="0 0 400 118" role="img" aria-label={description}>
+      <title>{description}</title>
       {[24, 63, 103].map((y) => <line className="chart-grid" key={y} x1="0" x2="400" y1={y} y2={y} />)}
       <polyline className="chart-line" points={points.join(" ")} />
       <circle className="chart-point" cx={last[0]} cy={last[1]} r="4.5" />

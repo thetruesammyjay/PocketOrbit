@@ -6,9 +6,9 @@ import { SiteHeader } from "@/components/site-header";
 
 const steps = [
   ["Add a source", "Start with a public wallet address or an exchange statement you exported."],
-  ["Review the records", "PocketOrbit checks the file, lines up asset identities, and marks records that need attention."],
-  ["See one portfolio", "Balances and supported activity are grouped into a portfolio view using repeatable calculations."],
-  ["Trace the details", "Open source details to see where a balance or price came from and when it was retrieved."]
+  ["Review the records", "The planned workflow lines up assets and marks records that need attention."],
+  ["See one portfolio", "Supported balances and activity are intended to come together in one understandable view."],
+  ["Trace the details", "Check where a balance or price came from and when its information was gathered."]
 ];
 
 export default function HowItWorksPage() {
@@ -16,16 +16,17 @@ export default function HowItWorksPage() {
     <>
       <SiteHeader />
       <main className="page-container section-space detail-page">
-        <section className="feature-intro">
-          <div>
+        <section className="marketing-subpage-hero">
+          <div className="marketing-subpage-copy">
             <span className="badge badge--violet">How it works</span>
-            <h1 className="page-title">From scattered records to a clearer picture.</h1>
-            <p className="body-copy">PocketOrbit is designed to organize supported records and keep their source information attached. It never needs permission to move your crypto.</p>
+            <h1 className="page-title">A clearer path from records to portfolio.</h1>
+            <p className="body-copy">PocketOrbit is designed to bring supported records together and keep the source attached to every useful detail. It does not need permission to move your assets.</p>
+            <Link className="button button--primary" href="/app">Explore the sample portfolio</Link>
           </div>
-          <aside className="feature-mascot-card">
-            <Image src="/brand/pocketorbit-comet.png" alt="" aria-hidden="true" width={330} height={347} />
-            <p><strong>Follow the activity.</strong><span>Each step adds context, so the summary is easier to make sense of.</span></p>
-          </aside>
+          <div className="marketing-subpage-art marketing-subpage-art--sources">
+            <Image src="/illustrations/source-assembly.svg" alt="Public wallet and exchange file joining one portfolio view" width={560} height={350} priority />
+            <Image className="marketing-subpage-mascot" src="/brand/pocketorbit-comet.png" alt="" aria-hidden="true" width={330} height={347} />
+          </div>
         </section>
 
         <section className="process-grid" aria-label="How PocketOrbit works">
@@ -38,12 +39,16 @@ export default function HowItWorksPage() {
           ))}
         </section>
 
+        <figure className="marketing-flow-figure">
+          <Image src="/brand/PocketOrbit-Product-Flow.png" alt="The four-part PocketOrbit concept: add a source, organize records, see the portfolio, and check the details." width={1536} height={1024} />
+          <figcaption>This diagram shows the intended workflow. The current portfolio demo contains illustrative sample values.</figcaption>
+        </figure>
+
         <div className="read-only-panel">
           <span className="read-only-dot" />
           <div><strong>Always read-only</strong><p>Never provide a seed phrase or private key. Use public addresses or records you choose to import.</p></div>
           <Link className="text-link" href="/security">Read about security</Link>
         </div>
-        <div className="detail-cta"><Link className="button button--primary" href="/app">Explore the sample portfolio</Link></div>
       </main>
       <SiteFooter />
     </>

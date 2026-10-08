@@ -1,4 +1,5 @@
-export function formatCurrency(value: string | number, currency = "USD") {
+export function formatCurrency(value: string | number | null | undefined, currency = "USD") {
+  if (value === null || value === undefined || value === "") return "Not available";
   const amount = typeof value === "number" ? value : Number(value);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -13,7 +14,8 @@ export function formatQuantity(value: string | number, maximumFractionDigits = 6
   return new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(Number.isFinite(amount) ? amount : 0);
 }
 
-export function formatPercent(value: string | number, withSign = false) {
+export function formatPercent(value: string | number | null | undefined, withSign = false) {
+  if (value === null || value === undefined || value === "") return "Not available";
   const amount = typeof value === "number" ? value : Number(value);
   const sign = withSign && amount > 0 ? "+" : "";
   return `${sign}${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"}%`;

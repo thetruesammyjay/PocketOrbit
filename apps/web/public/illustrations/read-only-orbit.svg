@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 350" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Read-only shield surrounded by a public address and a file</title>
+  <rect width="560" height="350" rx="28" fill="#EAF6FF"/>
+  <ellipse cx="280" cy="175" rx="199" ry="93" transform="rotate(-14 280 175)" stroke="#BBDFF8" stroke-width="3"/>
+  <ellipse cx="280" cy="175" rx="168" ry="110" transform="rotate(27 280 175)" stroke="#BBDFF8" stroke-width="2" stroke-dasharray="4 10"/>
+  <path d="M280 75c38 30 70 32 90 35v75c0 63-40 103-90 125-50-22-90-62-90-125v-75c20-3 52-5 90-35Z" fill="#FFFFFF" stroke="#131419" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="245" y="164" width="70" height="59" rx="14" fill="#6C5CE7"/>
+  <path d="M257 165v-18a23 23 0 0 1 46 0v18" stroke="#6C5CE7" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="280" cy="188" r="5" fill="#FFFFFF"/>
+  <path d="M280 191v12" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <rect x="47" y="66" width="141" height="54" rx="18" fill="#FFFFFF" stroke="#D7E8F2" stroke-width="2"/>
+  <circle cx="75" cy="93" r="12" fill="#18C98B"/>
+  <text x="95" y="98" fill="#41434A" font-family="Arial,sans-serif" font-size="13" font-weight="700">Public address</text>
+  <rect x="367" y="239" width="142" height="54" rx="18" fill="#FFFFFF" stroke="#D7E8F2" stroke-width="2"/>
+  <rect x="388" y="257" width="21" height="19" rx="4" fill="#56B7FF"/>
+  <text x="419" y="271" fill="#41434A" font-family="Arial,sans-serif" font-size="13" font-weight="700">CSV file</text>
+  <circle cx="467" cy="73" r="11" fill="#FFC857"/>
+  <circle cx="91" cy="268" r="8" fill="#6C5CE7"/>
+</svg>

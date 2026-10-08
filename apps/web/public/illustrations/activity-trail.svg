@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Illustrative activity timeline with a matched internal transfer</title>
+  <rect width="640" height="420" rx="30" fill="#F0F1EC"/>
+  <rect x="51" y="47" width="538" height="326" rx="24" fill="#FFFFFF" stroke="#E3E4DE" stroke-width="2"/>
+  <text x="84" y="94" fill="#131419" font-family="Arial,sans-serif" font-size="23" font-weight="700">Activity, with context</text>
+  <text x="84" y="121" fill="#7B7E87" font-family="Arial,sans-serif" font-size="13">Illustrative records</text>
+  <path d="M111 159v166" stroke="#D8D9D3" stroke-width="3"/>
+  <circle cx="111" cy="173" r="15" fill="#EAF6FF" stroke="#56B7FF" stroke-width="3"/>
+  <circle cx="111" cy="247" r="15" fill="#EFECFF" stroke="#6C5CE7" stroke-width="3"/>
+  <circle cx="111" cy="321" r="15" fill="#E8FAF3" stroke="#18C98B" stroke-width="3"/>
+  <text x="147" y="169" fill="#131419" font-family="Arial,sans-serif" font-size="17" font-weight="700">Exchange export</text>
+  <text x="147" y="191" fill="#7B7E87" font-family="Arial,sans-serif" font-size="13">Record added to the sample</text>
+  <path d="M147 212h393" stroke="#E3E4DE" stroke-width="2"/>
+  <text x="147" y="243" fill="#131419" font-family="Arial,sans-serif" font-size="17" font-weight="700">Transfer between your wallets</text>
+  <text x="147" y="265" fill="#7B7E87" font-family="Arial,sans-serif" font-size="13">Two sides of one movement</text>
+  <rect x="449" y="226" width="92" height="28" rx="14" fill="#E8FAF3"/>
+  <text x="465" y="245" fill="#126547" font-family="Arial,sans-serif" font-size="12" font-weight="700">Matched</text>
+  <path d="M147 286h393" stroke="#E3E4DE" stroke-width="2"/>
+  <text x="147" y="318" fill="#131419" font-family="Arial,sans-serif" font-size="17" font-weight="700">Source checked</text>
+  <text x="147" y="340" fill="#7B7E87" font-family="Arial,sans-serif" font-size="13">Last update stays visible</text>
+</svg>

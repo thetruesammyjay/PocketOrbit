@@ -1,6 +1,7 @@
 {
   "name": "pocketorbit",
   "private": true,
+  "packageManager": "pnpm@12.4.2",
   "engines": {
     "node": ">=20.9"
   },

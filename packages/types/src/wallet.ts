@@ -29,6 +29,7 @@ export interface LiveWalletBalance {
   network: WalletNetworkId;
   contractAddress: string | null;
   quantity: string;
+  decimals: number;
   quoteCurrency: string;
   unitPrice: string | null;
   value: string | null;
@@ -41,11 +42,15 @@ export interface WalletSyncResponse {
   network: WalletNetworkId;
   networkName: string;
   coverage:
+    | "not_synced"
     | "native_and_spl_token2022_fungible_balances"
-    | "native_and_configured_erc20_balances";
+    | "native_and_configured_erc20_balances"
+    | "native_and_indexed_erc20_balances";
   address: string;
-  isLive: true;
-  isPersisted: false;
+  isLive: boolean;
+  isPersisted: boolean;
+  sourceId?: string | null;
+  snapshotId?: string | null;
   retrievedAt: string;
   quoteCurrency: string;
   totalValue: string | null;
@@ -71,6 +76,6 @@ export interface WalletCapabilitiesResponse {
     configured: boolean;
   };
   networks: WalletNetworkCapability[];
-  persistence: false;
+  persistence: boolean;
   message: string;
 }

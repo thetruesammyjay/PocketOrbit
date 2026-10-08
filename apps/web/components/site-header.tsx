@@ -15,6 +15,7 @@ export function SiteHeader() {
           <Image className="brand-logo" src="/brand/PocketOrbit-Logo.png" alt="PocketOrbit" width={2034} height={427} priority />
         </Link>
         <nav className="site-links" aria-label="Main navigation">
+          <Link href="/#features">Product</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/security">Security</Link>
           <Link href="/learn">Learn</Link>
@@ -35,6 +36,7 @@ export function SiteHeader() {
         </div>
         {menuOpen && (
           <nav className="site-mobile-menu" id="site-mobile-menu" aria-label="Mobile navigation">
+            <Link href="/#features" onClick={closeMenu}>Product</Link>
             <Link href="/how-it-works" onClick={closeMenu}>How it works</Link>
             <Link href="/security" onClick={closeMenu}>Security</Link>
             <Link href="/learn" onClick={closeMenu}>Learn</Link>

@@ -6,10 +6,12 @@ export const demoPortfolio: PortfolioSummary = {
   isDemo: true,
   reportingCurrency: "USD",
   totalValue: "31686.37",
+  knownValue: "31686.37",
   change24h: "352.01",
   changePercent24h: "1.12",
   calculatedAt: "sample",
   quality: "estimated",
+  warnings: [],
   holdings: [
     { asset: { id: "bitcoin", symbol: "BTC", name: "Bitcoin" }, quantity: "0.084", unitPrice: "118500.00", value: "9954.00", change24h: "1.8", sourceIds: ["hardware-wallet", "exchange-import"] },
     { asset: { id: "ethereum", symbol: "ETH", name: "Ethereum", network: "Ethereum" }, quantity: "1.82", unitPrice: "3820.00", value: "6952.40", change24h: "0.9", sourceIds: ["exchange-import"] },

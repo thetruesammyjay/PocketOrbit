@@ -10,11 +10,13 @@ export type QualityStatus =
 export interface PortfolioSource {
   id: string;
   name: string;
-  kind: "wallet" | "exchange_import" | "exchange_api";
+  kind: "wallet" | "exchange_import" | "exchange_balance_import" | "exchange_api";
   network?: string | null;
   addressLabel?: string | null;
-  lastUpdatedAt: string;
+  lastUpdatedAt: string | null;
   quality: QualityStatus;
+  coverage?: string | null;
+  warnings?: string[];
 }
 
 export interface Provenance {

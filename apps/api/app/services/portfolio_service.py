@@ -17,7 +17,9 @@ def get_demo_portfolio_summary() -> dict[str, object]:
             "percentage": float(percentages[item["asset"]["id"]]),
             "color": color,
         }
-        for item, color in zip(DEMO_HOLDINGS, ["#6C5CE7", "#56B7FF", "#18C98B", "#FFC857"], strict=True)
+        for item, color in zip(
+            DEMO_HOLDINGS, ["#6C5CE7", "#56B7FF", "#18C98B", "#FFC857"], strict=True
+        )
     ]
 
     return {
@@ -26,10 +28,12 @@ def get_demo_portfolio_summary() -> dict[str, object]:
         "isDemo": True,
         "reportingCurrency": "USD",
         "totalValue": str(total),
+        "knownValue": str(total),
         "change24h": "352.01",
         "changePercent24h": "1.12",
         "calculatedAt": "sample",
         "quality": "estimated",
+        "warnings": [],
         "holdings": DEMO_HOLDINGS,
         "sources": DEMO_SOURCES,
         "allocation": allocations,

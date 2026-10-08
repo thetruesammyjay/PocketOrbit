@@ -1,18 +1,34 @@
 # Security and privacy
 
-## Product rules
+PocketOrbit is designed to read public information. It must never request seed phrases, private keys, recovery words, or wallet signing permissions. A public address linked to an account is still private application data.
 
-- PocketOrbit is read-only. Never request seed phrases, private keys, recovery phrases, or wallet signing permission.
-- Public addresses are public information, but the relationship between an address and an account is private application data.
-- Any future exchange API integration must use the least-privileged read-only access available. Never request trading, transfer, or withdrawal permission.
-- Keep provider credentials out of source control. Keep secrets separate from normalized portfolio records and never return full secret values to a client.
-- Send portfolio data to an AI provider only when a user opts into a feature that needs it.
-- Clearly label sample data, stale data, partial results, unmatched records, and estimates.
+## Implemented controls
 
-## Current scaffold limitations
+- Account passwords are stored as scrypt hashes. Browser sessions use random tokens in HttpOnly cookies; the database stores HMAC token digests and supports revocation at logout.
+- Production accounts must verify their email before sign-in. Verification links expire after 24 hours; password reset links expire after 30 minutes. Tokens are single-use and only HMAC digests are stored. Password reset revokes every active browser session.
+- Verification and recovery emails use SMTP over STARTTLS or implicit TLS. Production startup requires SMTP host and sender settings.
+- Users can delete their account after confirming their password. The API removes the active account, portfolios, sources, snapshots, transactions, imports, sessions, and account-specific rate-limit counters.
+- Portfolio reads and writes check account ownership.
+- Production startup requires HTTPS `WEB_ORIGIN`, PostgreSQL, a unique `SECRET_KEY` of at least 32 characters, and valid session settings. Production mutation requests must include a matching `Origin` or `Referer`.
+- In production, `/admin` pages return `404` unless the authenticated account email is included in the server-only `ADMIN_EMAILS` allowlist. The current admin pages are placeholders and have no privileged API endpoints.
+- Authentication, wallet refresh, and CSV operations use atomic PostgreSQL fixed-window rate limits shared across API instances. Limits return `429` with `Retry-After`; limiter database failures fail closed. Development without a database uses a process-local limiter only.
+- Request bodies are capped before FastAPI parses them. The default `MAX_REQUEST_BODY_BYTES` is 8 MiB, allowing a 5 MB CSV with multipart overhead.
+- Forwarded client IPs are trusted only when the direct peer belongs to an explicitly configured `TRUSTED_PROXY_CIDRS` network. Untrusted `X-Forwarded-For` headers are ignored.
+- RPC and price-provider credentials remain in the API environment. Provider errors are reduced to generic messages.
+- CSV files are limited to 5 MB and 20,000 rows. The original file is discarded; normalized transaction rows or balance snapshots and a SHA-256 file fingerprint are stored. Users can remove imports and their saved rows or balances.
+- EVM automatic token discovery and configured-contract fallback are bounded. Wallet addresses and snapshots are scoped to account-owned portfolios.
+- Missing prices, partial source coverage, delayed snapshots, unmatched assets, unverified CSV transactions, and user-provided balance statements are labeled.
 
-This repository does not yet implement authentication, account isolation, stored provider credentials, production rate limiting, or admin authorization. The `/admin` pages are UI placeholders and must not be used as a production operations console. The CSV preview endpoint reads uploaded content into memory, limits input to 5 MB, returns only a small preview, and does not store the file.
+## Remaining launch blockers
 
-## Before production
+This is an implementation baseline, not a completed security program. Before opening public registration:
 
-Choose and implement authentication and authorization; enforce portfolio ownership on every data endpoint; review upload handling and retention; configure HTTPS, secret storage, logging redaction, database backups, provider allowlists, and rate limits; and publish reviewed privacy and terms documents. Do not describe these controls as active until implemented.
+- publish and enforce retention schedules for backups and operational records after account deletion;
+- configure additional edge-level rate limits and connection/concurrency limits for the deployment;
+- build and protect operational admin endpoints with an administrator authorization model before adding privileged operations;
+- review the privacy and terms documents with appropriate counsel and publish retention/deletion policies;
+- configure database backups, restore drills, monitoring, alerting, and incident response;
+- review dependency updates, secret rotation, deployment access, log retention, and provider data-processing terms;
+- review CSV import semantics, transaction duplication, cost basis, internal-transfer handling, and source overlap before presenting account totals as complete.
+
+The sample portfolio is illustrative. Never treat fixture data as a connected account. Do not put provider credentials in `NEXT_PUBLIC_*` variables or commit local `.env` files.

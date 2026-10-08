@@ -25,3 +25,9 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local design reference mirror
+family/
+
+# TypeScript incremental build cache
+*.tsbuildinfo

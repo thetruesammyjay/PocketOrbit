@@ -1,20 +1,24 @@
 # PocketOrbit Project Structure
 
-This document records the files in the current scaffold and the boundaries between the web app, API, shared packages, and providers.
+This document maps the current PocketOrbit repository and explains the boundaries between the web app, API, shared packages, and providers.
 
 ## Repository status
 
-PocketOrbit now has an initial monorepo scaffold. The web app includes public pages and a sample portfolio experience. The API includes health, deterministic demo, CSV preview, and a stateless live wallet snapshot endpoint for configured RPC providers. Authentication, persistence, and exchange-specific integrations are not connected.
+PocketOrbit is a working monorepo prototype. Accounts, ownership-checked portfolios, persistent public-wallet snapshots, CSV transaction and balance imports, bounded price lookups, and a live portfolio dashboard are implemented. The public demo remains illustrative. EVM indexed token discovery can use dedicated Alchemy endpoints or compatible RPC providers and falls back to operator-configured contracts.
 
-The inventory below lists files currently present. No JavaScript or Python dependency lockfile has been generated yet; pnpm and uv create them during installation or first run. No test files are included in this scaffold.
+The inventory below lists the repository, application, package, brand, and documentation files. Local environment files, generated build output, virtual environments, dependency caches, and installed packages are excluded. Dependency manifests and lockfiles are maintained at the repository root and in the API package.
 
 ## Current file inventory
 
     PocketOrbit/
+    ├── .github/
+    │   └── workflows/
+    │       └── ci.yml
     ├── .editorconfig
     ├── .env.example
     ├── .gitignore
     ├── package.json
+    ├── pnpm-lock.yaml
     ├── pnpm-workspace.yaml
     ├── README.md
     ├── assets/
@@ -40,15 +44,19 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │   │   ├── tsconfig.json
     │   │   ├── app/
     │   │   │   ├── globals.css
+    │   │   │   ├── marketing.css
     │   │   │   ├── layout.tsx
     │   │   │   ├── page.tsx
     │   │   │   ├── how-it-works/page.tsx
     │   │   │   ├── learn/page.tsx
     │   │   │   ├── login/page.tsx
+    │   │   │   ├── forgot-password/page.tsx
     │   │   │   ├── privacy/page.tsx
     │   │   │   ├── register/page.tsx
+    │   │   │   ├── reset-password/page.tsx
     │   │   │   ├── security/page.tsx
     │   │   │   ├── terms/page.tsx
+    │   │   │   ├── verify-email/page.tsx
     │   │   │   ├── app/
     │   │   │   │   ├── layout.tsx
     │   │   │   │   ├── page.tsx
@@ -80,11 +88,17 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │   │   │   ├── feature-page.tsx
     │   │   │   ├── icon.tsx
     │   │   │   ├── page-heading.tsx
+    │   │   │   ├── portfolio-preview.tsx
     │   │   │   ├── quality-status.tsx
     │   │   │   └── site-header.tsx
     │   │   ├── features/
     │   │   │   ├── activity/activity-list.tsx
     │   │   │   ├── imports/import-preview-form.tsx
+    │   │   │   ├── auth/account-action-form.tsx
+    │   │   │   ├── auth/delete-account-form.tsx
+    │   │   │   ├── auth/auth-form.tsx
+    │   │   │   ├── wallets/add-wallet-form.tsx
+    │   │   │   ├── wallets/wallet-source-actions.tsx
     │   │   │   └── portfolio/
     │   │   │       ├── allocation-breakdown.tsx
     │   │   │       ├── dashboard.tsx
@@ -95,21 +109,31 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │   │   ├── lib/
     │   │   │   ├── format.ts
     │   │   │   └── routes.ts
-    │   │   └── public/brand/
-    │   │       ├── PocketOrbit-Logo-Horizontal.svg
-    │   │       ├── PocketOrbit-Mascot-Comet.svg
-    │   │       ├── PocketOrbit-Mascot-Orbit.svg
-    │   │       ├── PocketOrbit-Mascot-Scout.svg
-    │   │       ├── PocketOrbit-Orbit.png
-    │   │       ├── PocketOrbit-Product-Flow.png
-    │   │       ├── PocketOrbit-Favico.png
-    │   │       ├── pocketorbit-comet.png
-    │   │       └── pocketorbit-scout.png
+    │   │   └── public/
+    │   │       ├── illustrations/
+    │   │       │   ├── activity-trail.svg
+    │   │       │   ├── number-receipt.svg
+    │   │       │   ├── orbit-scene-left.svg
+    │   │       │   ├── orbit-scene-right.svg
+    │   │       │   ├── read-only-orbit.svg
+    │   │       │   └── source-assembly.svg
+    │   │       └── brand/
+    │   │           ├── PocketOrbit-Logo.png
+    │   │           ├── PocketOrbit-Logo-Horizontal.svg
+    │   │           ├── PocketOrbit-Mascot-Comet.svg
+    │   │           ├── PocketOrbit-Mascot-Orbit.svg
+    │   │           ├── PocketOrbit-Mascot-Scout.svg
+    │   │           ├── PocketOrbit-Orbit.png
+    │   │           ├── PocketOrbit-Product-Flow.png
+    │   │           ├── PocketOrbit-Favico.png
+    │   │           ├── pocketorbit-comet.png
+    │   │           └── pocketorbit-scout.png
     │   └── api/
     │       ├── .env.example
     │       ├── README.md
     │       ├── alembic.ini
     │       ├── pyproject.toml
+    │       ├── uv.lock
     │       ├── railway.toml
     │       ├── app/
     │       │   ├── __init__.py
@@ -120,6 +144,7 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       │   │   └── routes/
     │       │   │       ├── __init__.py
     │       │   │       ├── admin.py
+    │       │   │       ├── auth.py
     │       │   │       ├── health.py
     │       │   │       ├── imports.py
     │       │   │       ├── portfolios.py
@@ -145,6 +170,7 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       │   │   │   └── csv/
     │       │   │   │       ├── __init__.py
     │       │   │   │       ├── base.py
+    │       │   │   │       ├── normalizer.py
     │       │   │   │       └── registry.py
     │       │   │   ├── market_data/
     │       │   │   │   ├── __init__.py
@@ -156,9 +182,13 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       │   │   ├── config.py
     │       │   │   ├── database.py
     │       │   │   ├── logging.py
+    │       │   │   ├── rate_limit.py
+    │       │   │   ├── request_limits.py
     │       │   │   └── security.py
     │       │   ├── models/
     │       │   │   ├── __init__.py
+    │       │   │   ├── auth_action_token.py
+    │       │   │   ├── auth_session.py
     │       │   │   ├── activity.py
     │       │   │   ├── asset.py
     │       │   │   ├── audit_event.py
@@ -166,10 +196,12 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       │   │   ├── import_job.py
     │       │   │   ├── portfolio.py
     │       │   │   ├── price.py
+    │       │   │   ├── rate_limit.py
     │       │   │   ├── source.py
     │       │   │   ├── sync_job.py
     │       │   │   ├── user.py
-    │       │   │   └── valuation.py
+    │       │   │   ├── valuation.py
+    │       │   │   └── wallet_snapshot.py
     │       │   ├── schemas/
     │       │   │   ├── __init__.py
     │       │   │   ├── activity.py
@@ -182,16 +214,22 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       │   │   └── wallet.py
     │       │   ├── services/
     │       │   │   ├── __init__.py
+    │       │   │   ├── auth_email.py
     │       │   │   ├── activity_service.py
     │       │   │   ├── asset_service.py
     │       │   │   ├── demo_data.py
     │       │   │   ├── import_service.py
+    │       │   │   ├── csv_import_service.py
+    │       │   │   ├── csv_balance_import_service.py
+    │       │   │   ├── import_pricing_service.py
     │       │   │   ├── portfolio_service.py
+    │       │   │   ├── persistent_portfolios.py
     │       │   │   ├── pricing_service.py
     │       │   │   ├── quality_service.py
     │       │   │   ├── report_service.py
     │       │   │   ├── source_service.py
-    │       │   │   └── wallet_service.py
+    │       │   │   ├── wallet_service.py
+    │       │   │   └── wallet_persistence.py
     │       │   ├── workers/
     │       │   │   ├── __init__.py
     │       │   │   └── jobs.py
@@ -203,7 +241,15 @@ The inventory below lists files currently present. No JavaScript or Python depen
     │       └── migrations/
     │           ├── env.py
     │           ├── script.py.mako
-    │           └── versions/0001_initial.py
+    │           └── versions/
+    │               ├── 0001_initial.py
+    │               ├── 0002_auth_sessions.py
+    │               ├── 0003_persist_wallet_and_import_history.py
+    │               ├── 0004_shared_rate_limits.py
+    │               ├── 0005_email_verification_and_recovery.py
+    │               ├── 0006_valuation_calculation_version.py
+    │               ├── 0007_price_provenance.py
+    │               └── 0008_portfolio_read_indexes.py
     ├── packages/
     │   ├── config/
     │   │   ├── eslint.config.mjs
@@ -235,15 +281,17 @@ The inventory below lists files currently present. No JavaScript or Python depen
         ├── PROJECT_STRUCTURE.md
         └── SECURITY.md
 
-Runtime behavior and responsibilities are described below. Provider adapters and most account features exist only as extension points; check the status notes before connecting real data.
+Runtime behavior and responsibilities are described below. Current connection coverage and release limitations are documented in [API.md](API.md) and [SECURITY.md](SECURITY.md).
+
+API regression coverage lives in `apps/api/tests/test_csv_import.py`, `apps/api/tests/test_csv_balance_import.py`, `apps/api/tests/test_evm_discovery.py`, `apps/api/tests/test_portfolio_routes.py`, `apps/api/tests/test_provider_errors.py`, and `apps/api/tests/test_wallet_persistence.py`. The suite uses in-memory SQLite and mocked RPC responses; it does not require production services.
 
 ## Application boundaries
 
 | Area | Responsibility | Runtime / target |
 |---|---|---|
 | `apps/web` | Public pages, account experience, portfolio UI, admin operations | Next.js, TypeScript, Tailwind CSS, Hugeicons; Vercel |
-| `apps/api` | Authentication, imports, wallet sync, normalized data, APIs, deterministic calculations | Python, FastAPI, Pydantic, SQLAlchemy, Alembic; Railway |
-| PostgreSQL | Users, portfolios, source records, assets, balances, activity, prices, snapshots, jobs, quality metadata | NeonDB-hosted PostgreSQL |
+| `apps/api` | Sessions, account-owned portfolios, imports, wallet sync, normalized data, deterministic calculations | Python, FastAPI, Pydantic, SQLAlchemy, Alembic |
+| PostgreSQL | Users, sessions, portfolios, source records, wallet snapshots, transactions, prices, and valuations | PostgreSQL |
 | `packages/types` | Shared browser-side domain and API types | TypeScript package |
 | `packages/ui` | Reusable accessible visual primitives | React package |
 | `assets` and `docs` | Source brand artwork and product/engineering documentation | Repository content |
@@ -278,24 +326,24 @@ Portfolio balances, valuations, allocations, and historical calculations are com
 
 ## Current domain records
 
-The scaffolded SQLAlchemy models and initial migration cover:
+The SQLAlchemy models and Alembic migrations cover:
 
-- **User and portfolio:** account identity, portfolio ownership, reporting currency, and preferences.
-- **Source:** wallet, imported file, or later provider connection; includes its type, label, network, and sync state.
+- **User, auth session, and portfolio:** account identity, password hash, revocable session token hash, portfolio ownership, and reporting currency.
+- **Source and wallet snapshot:** public wallet or imported file identity, network, quality, last retrieval, coverage, warnings, and saved balance history.
 - **Asset and asset mapping:** canonical asset identity plus provider identifiers, symbol, network, contract address or mint, and exchange identifier. A symbol alone is not a safe identifier.
-- **Balance and transaction:** normalized quantities and activity associated with an asset and source.
+- **Balance and transaction:** normalized quantities tied to wallet snapshots or imported activity tied to a source.
 - **Price and valuation snapshot:** provider-specific prices and calculated portfolio values at recorded times.
-- **Import and sync job:** processing state, accepted/rejected counts, warnings, and operational diagnostics.
+- **Import and sync job:** CSV fingerprint, processing state, accepted/rejected counts, and operational diagnostics.
 - **Audit event:** administrative actions and other events needed for operational review.
 
-Records that contribute to displayed values should carry relevant provenance fields: `source_type`, `source_name`, `source_record_id`, `retrieved_at`, `effective_at`, `asset_id`, `network_id`, `contract_address`, `quality_status`, `is_estimated`, `is_stale`, `match_confidence`, and `normalization_version`.
+Balances keep source IDs, retrieval times, and snapshot IDs. Prices keep provider, provider update time, retrieval time, and quality. Transactions keep source record IDs, event time, and review status. Data quality is calculated from source coverage, price availability, and freshness.
 
 ## Connector responsibilities and status
 
-Connectors translate external records to normalized PocketOrbit records. They do not calculate authoritative portfolio totals or set product-wide asset identity rules. Solana and EVM RPC balance reads and optional CoinGecko spot pricing are implemented for the stateless wallet snapshot; the generic CSV parser only previews rows.
+Connectors translate external records to normalized PocketOrbit records. Portfolio aggregation and quality evaluation live in backend services. Solana and EVM RPC balance reads, saved wallet snapshots, CoinGecko prices, and validated CSV transaction and current-balance imports are implemented.
 
-- **Exchange CSV parsers:** identify the statement format, validate rows, normalize transaction types, and report rejected or unmatched rows.
-- **Blockchain connectors:** retrieve current public balances for Solana and EVM-compatible networks. Solana includes SPL and Token-2022 fungible balances; EVM includes native assets and only explicitly configured token contracts. Activity history is not yet implemented.
+- **Generic CSV importer:** lets users map columns, validates dates/types/amounts and exact network identities, stores transaction history and an import fingerprint, and reports rejected or unmatched rows. Exchange-specific templates are still planned.
+- **Blockchain connectors:** retrieve current public balances for Solana and EVM-compatible networks. Solana includes SPL and Token-2022 fungible balances; EVM can use dedicated Alchemy endpoints or indexed methods on a compatible RPC, then can fall back to configured contracts.
 - **Market-data connector:** optionally returns CoinGecko spot prices by asset ID and token contract or mint with provider timestamps. The API key and endpoint are configured server-side; unknown prices remain missing.
 - **Future exchange APIs:** if added, use the smallest available read-only permission set. Trading, withdrawal, and transfer permissions are out of scope.
 
@@ -303,7 +351,7 @@ Each price record keeps its provider and retrieval time. There is no assumed uni
 
 ## Product routes
 
-These routes reflect the screen map in [DESIGN.md](DESIGN.md). The scaffold includes a page for each route. Some pages are informational or placeholder screens; working data flows include the sample portfolio, CSV preview, demo export, and stateless live wallet snapshot API. The web wallet page and dashboard are not yet wired to the live snapshot endpoint.
+These routes reflect the screen map in [DESIGN.md](DESIGN.md). Account, portfolio, wallet source, import, and dashboard flows are connected. Admin routes are placeholders with a production email-allowlist gate; account settings, privacy, and terms remain placeholders or drafts and are not ready for public operations.
 
 | Route | Purpose |
 |---|---|
@@ -323,7 +371,7 @@ The admin area is for platform operations. It must not expose credentials or sec
 ## Security and privacy boundaries
 
 - Public wallet tracking uses public addresses. Never request seed phrases, private keys, recovery words, or wallet signing permissions.
-- Linking a public address to a PocketOrbit account is private application data. Users should be able to remove a wallet, imported file, portfolio records, and account.
+- Linking a public address to a PocketOrbit account is private application data. Users can remove saved wallet sources, CSV imports, and accounts. Backup copies still require an operator-defined retention schedule.
 - The initial exchange workflow prioritizes user-imported files. Any later API connection must be read-only, clearly disclose permissions, and allow disconnecting it.
 - Keep credentials separate from normalized portfolio records and encrypt them if a later integration requires storage. Never show a full secret after creation.
 - Send portfolio data to an AI provider only when the feature requires it and the user has opted in.
@@ -332,17 +380,17 @@ The admin area is for platform operations. It must not expose credentials or sec
 
 ## Environment and deployment
 
-The intended deployment targets are Vercel for `apps/web`, Railway for `apps/api`, and NeonDB for PostgreSQL. `.env.example` files document variable names and safe local defaults only; real credentials belong in an untracked local environment or deployment secret store. No deployment is configured by this scaffold.
+The API includes `apps/api/railway.toml`, which runs Alembic migrations before deployment and gates traffic on the API readiness endpoint. The web deployment target is not configured in this repository. `.env.example` files document variable names and safe local defaults only; real credentials belong in an untracked local environment or deployment secret store.
 
 Likely environment settings include the API base URL, database connection URL, authentication/session settings, and provider credentials. Add provider keys only when the corresponding connector is implemented. Never commit real credentials.
 
 ## Product roadmap boundaries
 
-1. **Foundation:** app shell, authentication, database schema, asset identity, source metadata, portfolio model, reporting currency.
-2. **Import MVP:** exchange CSV parsing, validation, normalization, price lookup, deterministic portfolio calculation, overview, and activity timeline.
-3. **Wallets:** supported public addresses, blockchain connectors, balances, public activity, and provenance.
-4. **Intelligence:** richer transaction classification, insights, reconciliation, plain-language explanations, and optional Guide.
-5. **Connected accounts:** read-only exchange APIs, scheduled synchronization, provider health, and alerts.
+1. **Implemented foundation:** account sessions, ownership-checked portfolios, source metadata, asset identity, and database migrations.
+2. **Implemented prototype flows:** public wallet snapshots, generic CSV transaction imports, bounded price lookups, data provenance, and portfolio views.
+3. **Launch readiness:** SMTP and proxy configuration, admin authorization, backups, restore drills, monitoring, retention policies, and reviewed legal documents.
+4. **Portfolio integrity:** internal transfer matching, complete exchange statement coverage, explainable cost basis, and realized/unrealized P&L.
+5. **Expansion:** exchange APIs, scheduled synchronization, provider health, richer activity classification, and optional plain-language explanations.
 6. **Reporting:** exports, cost-basis tools, jurisdiction-specific tax exports after review, and additional reporting currencies.
 
 The event build scope is defined separately in [HACKATHON.md](HACKATHON.md). Product direction and planned integrations in this file are not claims that those integrations are currently supported.

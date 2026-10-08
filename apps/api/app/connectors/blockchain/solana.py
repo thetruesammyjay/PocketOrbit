@@ -1,6 +1,5 @@
 import asyncio
 from datetime import UTC, datetime
-from decimal import Decimal
 
 import httpx
 
@@ -9,6 +8,7 @@ from app.connectors.base import (
     NormalizedBalance,
     ProviderNotConfiguredError,
     ProviderRequestError,
+    decimal_from_base_units,
 )
 from app.connectors.rpc import json_rpc
 from app.core.config import settings
@@ -54,7 +54,9 @@ class SolanaConnector(BalanceConnector):
         retrieved_at = datetime.now(UTC)
         native_result = results[0]
         native_lamports = native_result.get("value") if isinstance(native_result, dict) else None
-        if not isinstance(native_lamports, int):
+        if isinstance(native_lamports, bool) or not isinstance(native_lamports, int):
+            raise ProviderRequestError("Solana RPC returned an invalid native balance.")
+        if native_lamports < 0:
             raise ProviderRequestError("Solana RPC returned an invalid native balance.")
 
         native_context = native_result.get("context", {})
@@ -65,7 +67,7 @@ class SolanaConnector(BalanceConnector):
                 symbol="SOL",
                 name="Solana",
                 network_id=self.network_id,
-                quantity=Decimal(native_lamports).scaleb(-9),
+                quantity=decimal_from_base_units(native_lamports, 9),
                 contract_address=None,
                 decimals=9,
                 source_record_ids=(),
@@ -76,7 +78,9 @@ class SolanaConnector(BalanceConnector):
 
         tokens: dict[str, dict[str, object]] = {}
         for token_result in results[1:]:
-            if not isinstance(token_result, dict) or not isinstance(token_result.get("value"), list):
+            if not isinstance(token_result, dict) or not isinstance(
+                token_result.get("value"), list
+            ):
                 raise ProviderRequestError("Solana RPC returned invalid token account data.")
             context = token_result.get("context", {})
             slot = context.get("slot") if isinstance(context, dict) else None
@@ -87,12 +91,24 @@ class SolanaConnector(BalanceConnector):
                     mint = parsed["mint"]
                     amount = parsed["tokenAmount"]["amount"]
                     decimals = parsed["tokenAmount"]["decimals"]
-                    raw_amount = int(amount)
-                    decimals = int(decimals)
                 except (KeyError, TypeError, ValueError) as exc:
                     raise ProviderRequestError(
                         "Solana RPC could not parse one or more token accounts."
                     ) from exc
+                if (
+                    not isinstance(pubkey, str)
+                    or not isinstance(mint, str)
+                    or not isinstance(amount, str)
+                    or not amount.isascii()
+                    or not amount.isdecimal()
+                    or isinstance(decimals, bool)
+                    or not isinstance(decimals, int)
+                    or not 0 <= decimals <= 255
+                ):
+                    raise ProviderRequestError(
+                        "Solana RPC returned invalid token amount or decimal metadata."
+                    )
+                raw_amount = int(amount)
 
                 token = tokens.setdefault(
                     mint,
@@ -120,7 +136,7 @@ class SolanaConnector(BalanceConnector):
                     symbol=f"{mint[:4]}…{mint[-4:]}",
                     name="Unverified Solana token",
                     network_id=self.network_id,
-                    quantity=Decimal(raw_amount).scaleb(-decimals),
+                    quantity=decimal_from_base_units(raw_amount, decimals),
                     contract_address=mint,
                     decimals=decimals,
                     source_record_ids=tuple(records) if isinstance(records, list) else (),

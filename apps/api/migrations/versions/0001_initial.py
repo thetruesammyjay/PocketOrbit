@@ -2,8 +2,8 @@
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision: str = "0001_initial"
 down_revision: str | Sequence[str] | None = None
@@ -144,7 +144,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_valuation_snapshots_portfolio_id", "valuation_snapshots", ["portfolio_id"])
-    op.create_index("ix_valuation_snapshots_calculated_at", "valuation_snapshots", ["calculated_at"])
+    op.create_index(
+        "ix_valuation_snapshots_calculated_at", "valuation_snapshots", ["calculated_at"]
+    )
 
     op.create_table(
         "import_jobs",

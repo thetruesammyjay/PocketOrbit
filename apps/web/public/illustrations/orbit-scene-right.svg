@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 620" fill="none" role="img" aria-labelledby="title">
+  <title id="title">PocketOrbit orbital shapes with a source receipt</title>
+  <circle cx="327" cy="294" r="178" fill="#F0F1EC"/>
+  <ellipse cx="304" cy="313" rx="205" ry="145" transform="rotate(-23 304 313)" stroke="#DCDDD8" stroke-width="2" stroke-dasharray="5 12"/>
+  <circle cx="95" cy="130" r="25" fill="#18C98B"/>
+  <circle cx="442" cy="477" r="45" fill="#FFC857"/>
+  <path d="M410 489c19 3 37-2 58-16" stroke="#D89E28" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="39" cy="371" r="10" fill="#56B7FF"/>
+  <circle cx="442" cy="112" r="8" fill="#6C5CE7"/>
+  <path d="m65 463 8 18 19 7-19 8-8 18-7-18-19-8 19-7 7-18Z" fill="#6C5CE7"/>
+  <path d="m467 216 5 12 13 5-13 5-5 13-5-13-13-5 13-5 5-12Z" fill="#FFC857"/>
+  <g transform="rotate(9 285 301)">
+    <rect x="170" y="190" width="233" height="254" rx="28" fill="#FFFFFF" stroke="#131419" stroke-width="3"/>
+    <rect x="196" y="219" width="67" height="16" rx="8" fill="#EFECFF"/>
+    <rect x="196" y="257" width="157" height="11" rx="5.5" fill="#D9DAD5"/>
+    <rect x="196" y="278" width="112" height="9" rx="4.5" fill="#E9EAE6"/>
+    <path d="M196 310h181" stroke="#E3E4DE" stroke-width="2"/>
+    <circle cx="213" cy="344" r="9" fill="#6C5CE7"/>
+    <rect x="232" y="338" width="100" height="11" rx="5.5" fill="#41434A"/>
+    <circle cx="213" cy="382" r="9" fill="#56B7FF"/>
+    <rect x="232" y="376" width="83" height="11" rx="5.5" fill="#41434A"/>
+    <circle cx="213" cy="420" r="9" fill="#18C98B"/>
+    <rect x="232" y="414" width="111" height="11" rx="5.5" fill="#41434A"/>
+  </g>
+  <g transform="rotate(-14 120 342)">
+    <rect x="59" y="300" width="112" height="81" rx="21" fill="#EFECFF" stroke="#6C5CE7" stroke-width="3"/>
+    <circle cx="114" cy="340" r="24" fill="#6C5CE7"/>
+    <path d="m103 340 8 8 16-19" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

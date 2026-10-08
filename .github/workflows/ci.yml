@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API checks
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: pocketorbit
+          POSTGRES_USER: pocketorbit
+          POSTGRES_PASSWORD: ci-pocketorbit-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pocketorbit -d pocketorbit"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.11"
+          enable-cache: true
+          cache-dependency-glob: apps/api/uv.lock
+
+      - name: Install API dependencies
+        run: uv sync --directory apps/api --locked --group dev
+
+      - name: Lint API
+        run: uv run --directory apps/api ruff check app tests
+
+      - name: Run API regression suite
+        run: uv run --directory apps/api python -m unittest discover -s tests -v
+
+      - name: Apply migrations to PostgreSQL
+        run: uv run --directory apps/api alembic upgrade head
+        env:
+          DATABASE_URL: >-
+            postgresql+psycopg://pocketorbit:ci-pocketorbit-password@localhost:5432/pocketorbit
+
+      - name: Check PostgreSQL shared rate limits
+        run: >-
+          uv run --directory apps/api python -m unittest discover
+          -s tests -p test_postgres_rate_limit.py -v
+        env:
+          POCKETORBIT_POSTGRES_TEST_URL: >-
+            postgresql+psycopg://pocketorbit:ci-pocketorbit-password@localhost:5432/pocketorbit
+
+      - name: Apply migrations to SQLite
+        run: uv run --directory apps/api alembic upgrade head
+        env:
+          DATABASE_URL: sqlite+pysqlite:///:memory:
+
+  web:
+    name: Web checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm and Node.js
+        uses: pnpm/setup@v3
+        with:
+          version: 12.4.2
+          runtime: node@22
+          cache: true
+          require-lockfile: true
+
+      - name: Check TypeScript
+        run: pnpm typecheck
+
+      - name: Lint web app
+        run: pnpm lint
+
+      - name: Build production web app
+        run: pnpm build
+        env:
+          API_INTERNAL_URL: https://api.example.invalid/api/v1

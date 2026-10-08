@@ -1,3 +1,5 @@
+import csv
+
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.services.import_service import preview_csv
@@ -16,4 +18,9 @@ async def preview_import(file: UploadFile = File(...)) -> dict[str, object]:
     if len(contents) > MAX_IMPORT_BYTES:
         raise HTTPException(status_code=413, detail="The preview limit is 5 MB.")
 
-    return preview_csv(contents, filename)
+    try:
+        return preview_csv(contents, filename)
+    except (UnicodeDecodeError, csv.Error) as exc:
+        raise HTTPException(status_code=422, detail="The CSV format could not be read.") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

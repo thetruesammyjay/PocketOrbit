@@ -2,6 +2,7 @@
 builder = "NIXPACKS"
 
 [deploy]
+preDeployCommand = ["uv run alembic upgrade head"]
 startCommand = "uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/api/v1/health"
+healthcheckPath = "/api/v1/ready"
 healthcheckTimeout = 30

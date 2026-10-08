@@ -1,11 +1,44 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+
+from app.schemas.common import APIModel
 
 
 class SignInRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=12, max_length=1024)
 
 
-class SignInResponse(BaseModel):
-    authenticated: bool = False
-    message: str = "Authentication is not configured yet."
+class RegisterRequest(SignInRequest):
+    pass
+
+
+class EmailActionRequest(BaseModel):
+    email: EmailStr
+
+
+class TokenActionRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
+
+
+class PasswordResetRequest(TokenActionRequest):
+    password: str = Field(min_length=12, max_length=1024)
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str = Field(min_length=12, max_length=1024)
+
+
+class UserRead(BaseModel):
+    id: str
+    email: EmailStr
+
+
+class RegistrationResponse(APIModel):
+    id: str
+    email: EmailStr
+    verification_required: bool
+    message: str
+
+
+class ActionResponse(APIModel):
+    message: str

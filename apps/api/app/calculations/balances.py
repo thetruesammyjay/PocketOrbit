@@ -1,6 +1,6 @@
 from collections import defaultdict
+from collections.abc import Iterable
 from decimal import Decimal
-from typing import Iterable
 
 
 def aggregate_quantities(records: Iterable[tuple[str, Decimal]]) -> dict[str, Decimal]:

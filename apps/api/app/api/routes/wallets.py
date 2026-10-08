@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.orm import Session
 
 from app.connectors.base import ProviderNotConfiguredError, ProviderRequestError
+from app.core.database import get_optional_db
+from app.core.rate_limit import enforce_rate_limit, request_client_ip
 from app.schemas.wallet import WalletSyncRequest, WalletSyncResponse
 from app.services.wallet_service import refresh_public_wallet, wallet_capabilities
 
@@ -13,13 +16,24 @@ def get_wallet_capabilities() -> dict[str, object]:
 
 
 @router.post("/sync", response_model=WalletSyncResponse)
-async def sync_wallet(request: WalletSyncRequest) -> WalletSyncResponse:
+async def sync_wallet(
+    payload: WalletSyncRequest,
+    request: Request,
+    session: Session | None = Depends(get_optional_db),
+) -> WalletSyncResponse:
     """Fetch a current public-address snapshot without saving the address."""
+    enforce_rate_limit(
+        session,
+        scope="wallet-sync-preview-ip",
+        subject=request_client_ip(request),
+        max_requests=30,
+        window_seconds=3600,
+    )
     try:
         return await refresh_public_wallet(
-            network_id=request.network,
-            public_address=request.address,
-            quote_currency=request.quote_currency,
+            network_id=payload.network,
+            public_address=payload.address,
+            quote_currency=payload.quote_currency,
         )
     except ProviderNotConfiguredError as exc:
         raise HTTPException(

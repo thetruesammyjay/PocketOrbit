@@ -2,7 +2,13 @@
 
 DEMO_HOLDINGS = [
     {
-        "asset": {"id": "bitcoin", "symbol": "BTC", "name": "Bitcoin", "network": None, "contractAddress": None},
+        "asset": {
+            "id": "bitcoin",
+            "symbol": "BTC",
+            "name": "Bitcoin",
+            "network": None,
+            "contractAddress": None,
+        },
         "quantity": "0.084",
         "unitPrice": "118500.00",
         "value": "9954.00",
@@ -10,7 +16,13 @@ DEMO_HOLDINGS = [
         "sourceIds": ["hardware-wallet", "exchange-import"],
     },
     {
-        "asset": {"id": "ethereum", "symbol": "ETH", "name": "Ethereum", "network": "Ethereum", "contractAddress": None},
+        "asset": {
+            "id": "ethereum",
+            "symbol": "ETH",
+            "name": "Ethereum",
+            "network": "Ethereum",
+            "contractAddress": None,
+        },
         "quantity": "1.82",
         "unitPrice": "3820.00",
         "value": "6952.40",
@@ -18,7 +30,13 @@ DEMO_HOLDINGS = [
         "sourceIds": ["exchange-import"],
     },
     {
-        "asset": {"id": "solana", "symbol": "SOL", "name": "Solana", "network": "Solana", "contractAddress": None},
+        "asset": {
+            "id": "solana",
+            "symbol": "SOL",
+            "name": "Solana",
+            "network": "Solana",
+            "contractAddress": None,
+        },
         "quantity": "34.12",
         "unitPrice": "186.40",
         "value": "6359.97",
@@ -26,7 +44,13 @@ DEMO_HOLDINGS = [
         "sourceIds": ["solana-wallet"],
     },
     {
-        "asset": {"id": "usd-coin", "symbol": "USDC", "name": "USD Coin", "network": "Ethereum", "contractAddress": None},
+        "asset": {
+            "id": "usd-coin",
+            "symbol": "USDC",
+            "name": "USD Coin",
+            "network": "Ethereum",
+            "contractAddress": None,
+        },
         "quantity": "8420",
         "unitPrice": "1.00",
         "value": "8420.00",
