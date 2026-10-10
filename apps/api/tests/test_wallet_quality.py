@@ -135,7 +135,10 @@ class WalletQualityTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(response.total_value)
         self.assertEqual(response.balances, [])
         self.assertTrue(
-            any("exceeded the stored quantity precision" in warning for warning in response.warnings)
+            any(
+                "exceeded the stored quantity precision" in warning
+                for warning in response.warnings
+            )
         )
 
 

@@ -60,7 +60,7 @@ class AuthSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
             setattr(settings, name, value)
 
     async def test_register_login_and_logout_manage_persistent_session(self) -> None:
-        email = "pocketorbit-session@example.test"
+        email = "pocketorbit-session@example.com"
         password = "correct-horse-battery-staple"
 
         registration = await self.client.post(
@@ -106,7 +106,7 @@ class AuthSessionLifecycleTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_production_registration_requires_email_verification(self) -> None:
         settings.app_env = "production"
-        email = "pocketorbit-verify@example.test"
+        email = "pocketorbit-verify@example.com"
         password = "correct-horse-battery-staple"
         headers = {"origin": settings.web_origin}
 

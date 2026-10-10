@@ -7,9 +7,12 @@ import type { FormEvent } from "react";
 
 import { API_BASE_PATH } from "@/lib/api-base-path";
 
-type AuthFormProps = { mode: "register" | "login" };
+type AuthFormProps = {
+  mode: "register" | "login";
+  redirectTo?: "/app" | "/admin";
+};
 
-export function AuthForm({ mode }: AuthFormProps) {
+export function AuthForm({ mode, redirectTo = "/app" }: AuthFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +42,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         setSuccess(true);
         return;
       }
-      router.replace("/app");
+      router.replace(redirectTo);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The account service could not be reached.");

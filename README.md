@@ -13,11 +13,15 @@ PocketOrbit helps you understand crypto held across public wallets and exchange 
 - **See a saved portfolio.** Wallet syncs create timestamped snapshots. Imports and wallet sources belong to your account.
 - **Check the details.** Prices show their provider and update time. Old, missing, unmatched, or incomplete data is labeled.
 
+For the Crypto World's Fair submission, our selected networks are **Solana, Ethereum L1, and Base**. PocketOrbit reads public wallet data only; it does not request signing, private keys, or permission to move funds.
+
 Transaction history does not establish current holdings when rows are missing, and it may overlap wallet balances. Balance statements can populate holdings, but they are user-provided and are not independently verified. PocketOrbit keeps these portfolios marked partial instead of presenting them as complete.
 
 ## Try the sample
 
 The public demo is illustrative. Sample balances, prices, and activity do not come from live accounts. To save a portfolio, create an account after configuring the API database and wallet providers.
+
+For a CSV balance-import walkthrough, [`docs/demo/pocketorbit-sample-balances.csv`](docs/demo/pocketorbit-sample-balances.csv) contains synthetic values for Solana, Ethereum L1, and Base. They are examples only, not verified holdings.
 
 ## Run locally
 
@@ -53,7 +57,7 @@ Open `http://localhost:3000`. The API docs are at `http://localhost:8000/docs`. 
 
 PocketOrbit has account registration and login, ownership-checked portfolios, saved public-wallet sources, timestamped balance snapshots, CSV transaction and balance imports, import history and removal, current-price lookup for identified assets, and a dashboard connected to saved portfolio data. Unauthenticated users see a clearly labeled sample portfolio.
 
-This is not yet ready for a public production launch. Email verification, password recovery, account deletion, shared API rate limits, request-size controls, admin allowlists, read-only operational pages, and database-backed admin page-access events are implemented. Production still needs configured SMTP and trusted proxy settings where applicable, backup and restore operations, monitoring, reviewed privacy and terms documents, and retention policies. Cost basis, realized/unrealized P&L, reliable internal-transfer matching, and complete exchange transaction history are also outstanding. The limitations and release work are listed in [`docs/API.md`](docs/API.md) and [`docs/SECURITY.md`](docs/SECURITY.md).
+This is not yet ready for a public production launch. Email verification, password recovery, account deletion, shared API rate limits, request-size controls, admin allowlists, read-only operational pages, and database-backed admin page-access events are implemented. A hosted deployment still needs its own SMTP and trusted-proxy configuration where applicable, backup and restore operations, monitoring, reviewed privacy and terms documents, and retention policies. Cost basis, realized/unrealized P&L, reliable internal-transfer matching, and complete exchange transaction history are also outstanding. The limitations and release work are listed in [`docs/API.md`](docs/API.md), [`docs/SECURITY.md`](docs/SECURITY.md), and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Product principles
 
@@ -65,12 +69,16 @@ This is not yet ready for a public production launch. Email verification, passwo
 
 ## Documentation
 
+- [Contributing](CONTRIBUTING.md)
+- [MIT License](LICENSE.md)
 - [Product and UI design](docs/DESIGN.md)
 - [Project architecture and file map](docs/PROJECT_STRUCTURE.md)
 - [API routes and provider configuration](docs/API.md)
+- [Review demo deployment guide](docs/DEPLOYMENT.md)
 - [Connector coverage](docs/CONNECTORS.md)
 - [Security and launch gaps](docs/SECURITY.md)
 - [Crypto World's Fair hackathon plan](docs/HACKATHON.md)
+- [Hackathon submission draft and recording scripts](docs/HACKATHON_SUBMISSION.md)
 
 <p align="center">
   <strong>PocketOrbit</strong><br />

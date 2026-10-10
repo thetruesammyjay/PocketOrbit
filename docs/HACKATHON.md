@@ -2,6 +2,22 @@
 
 PocketOrbit is being built for the **2026 Crypto World's Fair by Colosseum**. This document defines the hackathon-sized product slice. The longer-term architecture and product roadmap are in [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md); the visual specification is in [DESIGN.md](DESIGN.md).
 
+## Competition scope and current build
+
+The selected networks for this submission are **Solana, Ethereum L1, and Base**. The API also recognizes Arbitrum, but Arbitrum is outside the competition scope we are presenting. Hyperliquid is not an integration.
+
+The working prototype includes account registration and sign-in, account-owned portfolios, read-only public wallet sources with saved snapshots, generic CSV transaction and current-balance imports, price lookups for identified assets, and a dashboard backed by saved portfolio data. Source, timestamp, coverage, and data-quality information travel with portfolio values. The unauthenticated sample portfolio is illustrative; it is not live account data.
+
+Keep these limitations explicit in the pitch and demo:
+
+- Wallet reads cover supported native assets and fungible tokens. They do not represent NFTs, DeFi positions, or complete on-chain transaction history.
+- EVM indexed discovery is bounded. Provider omissions, unsupported assets, and partial reads are labeled; an incomplete portfolio total is withheld.
+- CSV transaction history does not establish current holdings. A current-balance CSV can populate holdings, but it is user-provided and remains marked for review.
+- Cost basis, realized/unrealized P&L, reliable internal-transfer matching, direct exchange API connections, and verified full-history performance are not implemented.
+- The public sample dashboard is not a deployed live-account demo. A live demo requires a reachable web app and API, a production database, and working provider configuration.
+
+The submission-ready product description, pitch and demo scripts, and outstanding portal fields are collected in [HACKATHON_SUBMISSION.md](HACKATHON_SUBMISSION.md).
+
 ## MVP goal
 
 Demonstrate that someone can bring supported crypto records together in a single, read-only portfolio view and understand where the important numbers came from.
@@ -96,7 +112,7 @@ Use clear states such as **Fresh**, **Delayed**, **Partial**, **Needs review**, 
 
 Use a clearly identified demo portfolio or fixture data if a live provider is unavailable. Demo data must not be presented as a user's live wallet data.
 
-## Hackathon acceptance criteria
+## MVP acceptance target (not a claim that every item is complete)
 
 - A new portfolio can be created without granting control over assets.
 - At least one supported exchange CSV format can be imported and reviewed.

@@ -61,7 +61,10 @@ def import_csv_balance_statement(
         if duplicate:
             raise HTTPException(
                 status_code=409,
-                detail="A balance source with this name already exists. Select it to add a new snapshot.",
+                detail=(
+                    "A balance source with this name already exists. "
+                    "Select it to add a new snapshot."
+                ),
             )
         source = Source(
             portfolio_id=portfolio.id,
@@ -77,7 +80,10 @@ def import_csv_balance_statement(
             session.rollback()
             raise HTTPException(
                 status_code=409,
-                detail="A balance source with this name already exists. Select it to add a new snapshot.",
+                detail=(
+                    "A balance source with this name already exists. "
+                    "Select it to add a new snapshot."
+                ),
             ) from exc
     else:
         source = session.scalar(

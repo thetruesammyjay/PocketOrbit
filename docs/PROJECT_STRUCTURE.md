@@ -17,6 +17,8 @@ The inventory below lists the repository, application, package, brand, and docum
     ├── .editorconfig
     ├── .env.example
     ├── .gitignore
+    ├── CONTRIBUTING.md
+    ├── LICENSE.md
     ├── package.json
     ├── pnpm-lock.yaml
     ├── pnpm-workspace.yaml
@@ -59,6 +61,7 @@ The inventory below lists the repository, application, package, brand, and docum
     │   │   │   ├── verify-email/page.tsx
     │   │   │   ├── app/
     │   │   │   │   ├── layout.tsx
+    │   │   │   │   ├── error.tsx
     │   │   │   │   ├── page.tsx
     │   │   │   │   ├── activity/page.tsx
     │   │   │   │   ├── import/page.tsx
@@ -70,26 +73,32 @@ The inventory below lists the repository, application, package, brand, and docum
     │   │   │   │   ├── sources/page.tsx
     │   │   │   │   └── wallets/add/page.tsx
     │   │   │   └── admin/
-    │   │   │       ├── layout.tsx
-    │   │   │       ├── page.tsx
-    │   │   │       ├── assets/page.tsx
-    │   │   │       ├── audit/page.tsx
-    │   │   │       ├── imports/page.tsx
-    │   │   │       ├── jobs/page.tsx
-    │   │   │       ├── portfolios/page.tsx
-    │   │   │       ├── settings/page.tsx
-    │   │   │       ├── sources/page.tsx
-    │   │   │       ├── system/page.tsx
-    │   │   │       └── users/page.tsx
+    │   │   │       ├── login/page.tsx
+    │   │   │       └── (protected)/
+    │   │   │           ├── layout.tsx
+    │   │   │           ├── page.tsx
+    │   │   │           ├── assets/page.tsx
+    │   │   │           ├── audit/page.tsx
+    │   │   │           ├── imports/page.tsx
+    │   │   │           ├── jobs/page.tsx
+    │   │   │           ├── portfolios/page.tsx
+    │   │   │           ├── settings/page.tsx
+    │   │   │           ├── sources/page.tsx
+    │   │   │           ├── system/page.tsx
+    │   │   │           └── users/page.tsx
     │   │   ├── components/
+    │   │   │   ├── admin-data-page.tsx
     │   │   │   ├── admin-feature-page.tsx
     │   │   │   ├── admin-shell.tsx
     │   │   │   ├── app-shell.tsx
     │   │   │   ├── feature-page.tsx
     │   │   │   ├── icon.tsx
+    │   │   │   ├── crypto-asset-icon.tsx
     │   │   │   ├── page-heading.tsx
     │   │   │   ├── portfolio-preview.tsx
     │   │   │   ├── quality-status.tsx
+    │   │   │   ├── scroll-reveal.tsx
+    │   │   │   ├── site-footer.tsx
     │   │   │   └── site-header.tsx
     │   │   ├── features/
     │   │   │   ├── activity/activity-list.tsx
@@ -107,8 +116,11 @@ The inventory below lists the repository, application, package, brand, and docum
     │   │   │       ├── portfolio-api.ts
     │   │   │       └── portfolio-chart.tsx
     │   │   ├── lib/
+    │   │   │   ├── api-base-path.ts
     │   │   │   ├── format.ts
-    │   │   │   └── routes.ts
+    │   │   │   ├── internal-api-url.ts
+    │   │   │   ├── routes.ts
+    │   │   │   └── server-session-cookie.ts
     │   │   └── public/
     │   │       ├── illustrations/
     │   │       │   ├── activity-trail.svg
@@ -238,18 +250,31 @@ The inventory below lists the repository, application, package, brand, and docum
     │       │       ├── import_workflow.py
     │       │       ├── portfolio_refresh_workflow.py
     │       │       └── wallet_sync_workflow.py
-    │       └── migrations/
-    │           ├── env.py
-    │           ├── script.py.mako
-    │           └── versions/
-    │               ├── 0001_initial.py
-    │               ├── 0002_auth_sessions.py
-    │               ├── 0003_persist_wallet_and_import_history.py
-    │               ├── 0004_shared_rate_limits.py
-    │               ├── 0005_email_verification_and_recovery.py
-    │               ├── 0006_valuation_calculation_version.py
-    │               ├── 0007_price_provenance.py
-    │               └── 0008_portfolio_read_indexes.py
+    │       ├── migrations/
+    │       │   ├── env.py
+    │       │   ├── script.py.mako
+    │       │   └── versions/
+    │       │       ├── 0001_initial.py
+    │       │       ├── 0002_auth_sessions.py
+    │       │       ├── 0003_persist_wallet_and_import_history.py
+    │       │       ├── 0004_shared_rate_limits.py
+    │       │       ├── 0005_email_verification_and_recovery.py
+    │       │       ├── 0006_valuation_calculation_version.py
+    │       │       ├── 0007_price_provenance.py
+    │       │       ├── 0008_portfolio_read_indexes.py
+    │       │       └── 0009_import_balance_snapshot_reference.py
+    │       └── tests/
+    │           ├── test_auth_sessions.py
+    │           ├── test_csv_balance_import.py
+    │           ├── test_csv_import.py
+    │           ├── test_evm_discovery.py
+    │           ├── test_network_config.py
+    │           ├── test_portfolio_routes.py
+    │           ├── test_postgres_rate_limit.py
+    │           ├── test_production_config.py
+    │           ├── test_provider_errors.py
+    │           ├── test_wallet_persistence.py
+    │           └── test_wallet_quality.py
     ├── packages/
     │   ├── config/
     │   │   ├── eslint.config.mjs
@@ -276,14 +301,19 @@ The inventory below lists the repository, application, package, brand, and docum
         ├── ARCHITECTURE.md
         ├── CONNECTORS.md
         ├── DATA-MODEL.md
+        ├── DEPLOYMENT.md
+        ├── demo/
+        │   ├── README.md
+        │   └── pocketorbit-sample-balances.csv
         ├── DESIGN.md
         ├── HACKATHON.md
+        ├── HACKATHON_SUBMISSION.md
         ├── PROJECT_STRUCTURE.md
         └── SECURITY.md
 
-Runtime behavior and responsibilities are described below. Current connection coverage and release limitations are documented in [API.md](API.md) and [SECURITY.md](SECURITY.md).
+Runtime behavior and responsibilities are described below. Current connection coverage, deployment steps, and release limitations are documented in [API.md](API.md), [DEPLOYMENT.md](DEPLOYMENT.md), and [SECURITY.md](SECURITY.md).
 
-API regression coverage lives in `apps/api/tests/test_csv_import.py`, `apps/api/tests/test_csv_balance_import.py`, `apps/api/tests/test_evm_discovery.py`, `apps/api/tests/test_portfolio_routes.py`, `apps/api/tests/test_provider_errors.py`, and `apps/api/tests/test_wallet_persistence.py`. The suite uses in-memory SQLite and mocked RPC responses; it does not require production services.
+API regression coverage lives in the `apps/api/tests/` files listed above. Most tests use in-memory SQLite and mocked RPC responses. `test_postgres_rate_limit.py` exercises shared limiter behavior against PostgreSQL when `POCKETORBIT_POSTGRES_TEST_URL` is configured.
 
 ## Application boundaries
 
@@ -362,6 +392,7 @@ These routes reflect the screen map in [DESIGN.md](DESIGN.md). Account, portfoli
 | `/app/portfolio`, `/app/activity`, `/app/sources`, `/app/insights` | Portfolio detail, timeline, source management, and explanations |
 | `/app/learn`, `/app/import`, `/app/wallets/add` | Education, exchange-file import, and public-wallet setup |
 | `/app/reports`, `/app/settings` | Exports and account preferences |
+| `/admin/login` | Administrator account sign-in; uses the normal account session |
 | `/admin` | Operational overview |
 | `/admin/users`, `/admin/portfolios`, `/admin/imports`, `/admin/sources` | Support and source operations |
 | `/admin/assets`, `/admin/jobs`, `/admin/system`, `/admin/audit`, `/admin/settings` | Asset registry, job and system health, audit, and admin configuration |

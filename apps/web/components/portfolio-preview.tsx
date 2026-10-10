@@ -1,8 +1,10 @@
+import { CryptoAssetIcon } from "@/components/crypto-asset-icon";
+
 const assets = [
-  { symbol: "BTC", name: "Bitcoin", percent: "31.4%", color: "violet" },
-  { symbol: "ETH", name: "Ethereum", percent: "21.9%", color: "sky" },
-  { symbol: "SOL", name: "Solana", percent: "20.1%", color: "mint" }
-];
+  { symbol: "BTC", name: "Bitcoin", percent: "31.4%" },
+  { symbol: "ETH", name: "Ethereum", percent: "21.9%" },
+  { symbol: "SOL", name: "Solana", percent: "20.1%" }
+] as const;
 
 export function PortfolioPreview() {
   return (
@@ -18,13 +20,13 @@ export function PortfolioPreview() {
           <p>Illustrative snapshot across three sample sources</p>
           <svg className="marketing-preview-chart" viewBox="0 0 590 145" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 132H590M0 79H590M0 26H590" stroke="#E9EAE6" strokeWidth="1"/>
-            <path d="M0 121 48 105 96 110 144 91 190 100 238 80 284 86 334 65 383 71 432 49 482 52 532 30 590 17" fill="none" stroke="#6C5CE7" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+            <path className="marketing-preview-chart-line" d="M0 121 48 105 96 110 144 91 190 100 238 80 284 86 334 65 383 71 432 49 482 52 532 30 590 17" pathLength={1} fill="none" stroke="#6C5CE7" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
             <circle cx="590" cy="17" r="7" fill="#FFFFFF" stroke="#6C5CE7" strokeWidth="4"/>
           </svg>
           <div className="marketing-preview-assets" aria-label="Sample assets">
             {assets.map((asset) => (
               <div className="marketing-preview-asset" key={asset.symbol}>
-                <span className={`marketing-preview-asset-mark marketing-preview-asset-mark--${asset.color}`} aria-hidden="true" />
+                <CryptoAssetIcon symbol={asset.symbol} />
                 <span><strong>{asset.symbol}</strong><small>{asset.name}</small></span>
                 <b>{asset.percent}</b>
               </div>

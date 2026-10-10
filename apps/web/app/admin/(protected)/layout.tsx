@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AdminShell } from "@/components/admin-shell";
@@ -34,7 +34,7 @@ async function isAllowedAdmin(): Promise<boolean> {
   }
 }
 
-export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
-  if (process.env.NODE_ENV === "production" && !(await isAllowedAdmin())) notFound();
+export default async function ProtectedAdminLayout({ children }: Readonly<{ children: ReactNode }>) {
+  if (!(await isAllowedAdmin())) redirect("/admin/login?reason=not-allowed");
   return <AdminShell>{children}</AdminShell>;
 }
