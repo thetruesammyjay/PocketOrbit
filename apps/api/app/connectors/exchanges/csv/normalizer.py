@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import io
 import re
 from dataclasses import dataclass
@@ -18,6 +19,11 @@ HEADER_ALIASES = {
     "network": ("network", "chain", "blockchain"),
     "contract_address": ("contract", "contract_address", "mint", "token_address"),
     "transaction_id": ("transaction_id", "txid", "tx_hash", "id", "reference"),
+    "transaction_hash": ("transaction_hash", "blockchain_hash", "tx_hash", "txid"),
+    "fee_quantity": ("fee", "fee_amount", "commission", "network_fee"),
+    "fee_asset": ("fee_asset", "fee_currency", "fee_coin"),
+    "quote_amount": ("quote_amount", "total", "value", "proceeds", "cost", "fiat_value"),
+    "quote_currency": ("quote_currency", "fiat_currency", "currency", "quote"),
 }
 INBOUND_KINDS = {
     "buy",
@@ -56,15 +62,14 @@ KIND_ALIASES = {
     "fee": "fee",
 }
 SUPPORTED_NETWORKS = {"solana", "ethereum", "base", "arbitrum"}
-THOUSANDS_SEPARATOR_PATTERN = re.compile(
-    r"^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:[eE][+-]?\d+)?$"
-)
+THOUSANDS_SEPARATOR_PATTERN = re.compile(r"^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:[eE][+-]?\d+)?$")
 
 
 @dataclass(frozen=True)
 class NormalizedCsvTransaction:
     row_number: int
     source_record_id: str
+    external_record_id: str | None
     occurred_at: datetime
     symbol: str
     quantity: Decimal
@@ -72,6 +77,11 @@ class NormalizedCsvTransaction:
     network_id: str | None
     contract_address: str | None
     quality_status: str
+    transaction_hash: str | None = None
+    fee_quantity: Decimal | None = None
+    fee_symbol: str | None = None
+    quote_amount: Decimal | None = None
+    quote_currency: str | None = None
 
 
 @dataclass(frozen=True)
@@ -137,6 +147,11 @@ def parse_csv_transactions(contents: bytes, mapping: CsvFieldMapping) -> CsvPars
         mapping.network,
         mapping.contract_address,
         mapping.transaction_id,
+        mapping.transaction_hash,
+        mapping.fee_quantity,
+        mapping.fee_asset,
+        mapping.quote_amount,
+        mapping.quote_currency,
     ]
     missing = [column for column in mapped_columns if column and column not in columns]
     if missing:
@@ -145,7 +160,7 @@ def parse_csv_transactions(contents: bytes, mapping: CsvFieldMapping) -> CsvPars
     rejected: list[dict[str, object]] = []
     unmatched_assets: set[str] = set()
     warnings: set[str] = set()
-    seen_record_ids: set[str] = set()
+    seen_rows: set[tuple[object, ...]] = set()
     rows_received = 0
     try:
         for row_number, row in enumerate(reader, start=2):
@@ -156,9 +171,21 @@ def parse_csv_transactions(contents: bytes, mapping: CsvFieldMapping) -> CsvPars
                 if None in row:
                     raise ValueError("This row has more values than the CSV header.")
                 normalized = _normalize_row(row, row_number, mapping)
-                if normalized.source_record_id in seen_record_ids:
-                    raise ValueError("This transaction ID appears more than once in the CSV.")
-                seen_record_ids.add(normalized.source_record_id)
+                identifier = normalized.external_record_id or normalized.transaction_hash
+                row_identity = (
+                    normalized.symbol,
+                    normalized.network_id,
+                    normalized.contract_address,
+                    normalized.kind,
+                    normalized.quantity,
+                    normalized.occurred_at,
+                    identifier,
+                    normalized.fee_quantity,
+                    normalized.fee_symbol,
+                )
+                if row_identity in seen_rows:
+                    raise ValueError("This transaction row appears more than once in the CSV.")
+                seen_rows.add(row_identity)
                 accepted.append(normalized)
                 if normalized.quality_status != "fresh":
                     unmatched_assets.add(normalized.symbol)
@@ -331,8 +358,6 @@ def _normalize_row(
             raise ValueError("A negative quantity conflicts with an incoming transaction type.")
         signed_quantity = abs(quantity) if kind in INBOUND_KINDS else -abs(quantity)
     else:
-        if quantity > 0:
-            raise ValueError("A transaction type is needed when the amount is positive.")
         kind = "received" if quantity > 0 else "sent"
         signed_quantity = quantity
 
@@ -340,7 +365,45 @@ def _normalize_row(
     raw_id = (row.get(mapping.transaction_id or "") or "").strip()
     if len(raw_id) > 256 or any(ord(character) < 32 for character in raw_id):
         raise ValueError("Transaction ID is too long or contains control characters.")
-    source_record_id = raw_id if raw_id else f"row:{row_number}"
+    external_record_id = raw_id or None
+
+    transaction_hash = (row.get(mapping.transaction_hash or "") or "").strip() or None
+    if transaction_hash and (
+        len(transaction_hash) > 128 or any(ord(character) < 32 for character in transaction_hash)
+    ):
+        raise ValueError("Transaction hash is too long or contains control characters.")
+
+    raw_fee = (row.get(mapping.fee_quantity or "") or "").strip()
+    fee_quantity = _parse_decimal_value(raw_fee, "Fee") if raw_fee else None
+    if fee_quantity is not None and (
+        not fee_quantity.is_finite()
+        or fee_quantity < 0
+        or fee_quantity.adjusted() >= 20
+        or max(0, -fee_quantity.as_tuple().exponent) > 18
+    ):
+        raise ValueError("Fee must be a finite, non-negative amount with supported precision.")
+    fee_symbol = (row.get(mapping.fee_asset or "") or "").strip().upper() or None
+    if fee_symbol and not re.fullmatch(r"[A-Z0-9][A-Z0-9._-]{0,31}", fee_symbol):
+        raise ValueError("Fee asset symbol is invalid.")
+    if fee_quantity and not fee_symbol:
+        fee_symbol = raw_symbol
+
+    raw_quote = (row.get(mapping.quote_amount or "") or "").strip()
+    quote_amount = _parse_decimal_value(raw_quote, "Transaction value") if raw_quote else None
+    if quote_amount is not None and (
+        not quote_amount.is_finite()
+        or quote_amount < 0
+        or quote_amount.adjusted() >= 20
+        or max(0, -quote_amount.as_tuple().exponent) > 18
+    ):
+        raise ValueError(
+            "Transaction value must be finite, non-negative, and within supported precision."
+        )
+    quote_currency = (row.get(mapping.quote_currency or "") or "").strip().upper() or None
+    if quote_currency and not re.fullmatch(r"[A-Z]{3}", quote_currency):
+        raise ValueError("Quote currency must be a three-letter currency code.")
+    if quote_amount is not None and not quote_currency:
+        raise ValueError("Map a quote currency when the CSV includes a transaction value.")
 
     network_value = (row.get(mapping.network or "") or "").strip().lower()
     network = _normalize_network(network_value) if network_value else None
@@ -362,9 +425,27 @@ def _normalize_row(
         network = network if network in SUPPORTED_NETWORKS else None
         quality_status = "unmatched"
 
+    row_identity = "\x1f".join(
+        (
+            external_record_id or "",
+            transaction_hash or "",
+            occurred_at.isoformat(),
+            raw_symbol,
+            network or "",
+            contract or "",
+            kind,
+            str(signed_quantity),
+            str(fee_quantity or ""),
+            fee_symbol or "",
+            str(quote_amount or ""),
+            quote_currency or "",
+        )
+    )
+    source_record_id = hashlib.sha256(row_identity.encode("utf-8")).hexdigest()
     return NormalizedCsvTransaction(
         row_number=row_number,
         source_record_id=source_record_id,
+        external_record_id=external_record_id,
         occurred_at=occurred_at,
         symbol=raw_symbol,
         quantity=signed_quantity,
@@ -372,6 +453,11 @@ def _normalize_row(
         network_id=network,
         contract_address=contract or None,
         quality_status=quality_status,
+        transaction_hash=transaction_hash,
+        fee_quantity=fee_quantity,
+        fee_symbol=fee_symbol,
+        quote_amount=quote_amount,
+        quote_currency=quote_currency,
     )
 
 

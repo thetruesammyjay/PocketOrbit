@@ -441,6 +441,95 @@ class PortfolioWalletRouteTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(session.scalar(select(func.count()).select_from(ImportJob)), 0)
             self.assertEqual(session.scalar(select(func.count()).select_from(Transaction)), 0)
 
+    async def test_activity_review_transfer_confirmation_and_performance_routes(self) -> None:
+        mapping = dumps(
+            {
+                "occurredAt": "date",
+                "asset": "asset",
+                "quantity": "amount",
+                "kind": "type",
+                "network": "network",
+                "transactionId": "id",
+            }
+        )
+        uploads = [
+            (
+                "Exchange A",
+                b"date,asset,amount,type,network,id\n"
+                b"2026-08-01T12:00:00Z,ETH,1.5,withdrawal,ethereum,withdraw-1\n",
+            ),
+            (
+                "Exchange B",
+                b"date,asset,amount,type,network,id\n"
+                b"2026-08-01T12:10:00Z,ETH,1.5,deposit,ethereum,deposit-1\n",
+            ),
+        ]
+        import_ids = []
+        for source_name, contents in uploads:
+            response = await self.client.post(
+                f"/api/v1/portfolios/{self.portfolio_id}/imports",
+                data={
+                    "mapping": mapping,
+                    "transactionSourceName": source_name,
+                    "historyComplete": "true",
+                },
+                files={"file": (f"{source_name}.csv", contents, "text/csv")},
+                headers={"origin": settings.web_origin},
+            )
+            self.assertEqual(response.status_code, 201, response.text)
+            imported = response.json()
+            self.assertTrue(imported["historyComplete"])
+            self.assertEqual(imported["rowsAccepted"], 1)
+            import_ids.append(imported["importId"])
+
+        first_page = await self.client.get(
+            f"/api/v1/portfolios/{self.portfolio_id}/activity?offset=0&limit=1"
+        )
+        second_page = await self.client.get(
+            f"/api/v1/portfolios/{self.portfolio_id}/activity?offset=1&limit=1"
+        )
+        self.assertEqual(first_page.status_code, 200, first_page.text)
+        self.assertEqual(second_page.status_code, 200, second_page.text)
+        incoming_id = first_page.json()[0]["id"]
+        outgoing_id = second_page.json()[0]["id"]
+        self.assertEqual(first_page.json()[0]["status"], "needs_review")
+
+        for transaction_id in (outgoing_id, incoming_id):
+            review = await self.client.post(
+                f"/api/v1/portfolios/{self.portfolio_id}/activity/{transaction_id}/review",
+                json={"accepted": True},
+                headers={"origin": settings.web_origin},
+            )
+            self.assertEqual(review.status_code, 204, review.text)
+
+        transfers = await self.client.get(f"/api/v1/portfolios/{self.portfolio_id}/transfers")
+        self.assertEqual(transfers.status_code, 200, transfers.text)
+        self.assertEqual(len(transfers.json()), 1)
+        suggestion = transfers.json()[0]
+        self.assertEqual(suggestion["status"], "suggested")
+
+        confirmed = await self.client.post(
+            f"/api/v1/portfolios/{self.portfolio_id}/transfers/{suggestion['id']}/review",
+            json={"accepted": True},
+            headers={"origin": settings.web_origin},
+        )
+        self.assertEqual(confirmed.status_code, 200, confirmed.text)
+        self.assertEqual(confirmed.json()["status"], "matched")
+
+        performance = await self.client.get(
+            f"/api/v1/portfolios/{self.portfolio_id}/performance"
+        )
+        self.assertEqual(performance.status_code, 200, performance.text)
+        self.assertEqual(performance.json()["status"], "complete")
+        self.assertEqual(performance.json()["totalPnl"], "0.00")
+
+        with Session(self.engine) as session:
+            self.assertEqual(session.scalar(select(func.count()).select_from(ImportJob)), 2)
+            self.assertEqual(session.scalar(select(func.count()).select_from(Transaction)), 2)
+
+        unauthorized = await self.client.get(f"/api/v1/portfolios/{uuid4()}/activity")
+        self.assertEqual(unauthorized.status_code, 404)
+
     async def test_balance_statement_route_populates_reviewable_holdings_and_removes_them(
         self,
     ) -> None:

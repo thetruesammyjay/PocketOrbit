@@ -7,9 +7,14 @@ from app.schemas.common import APIModel
 
 class ActivityRead(APIModel):
     id: str
-    kind: Literal["received", "sent", "trade", "fee", "deposit", "withdrawal"]
+    kind: str
     asset_symbol: str
     quantity: Decimal
     source_name: str
     occurred_at: datetime | str
-    status: Literal["confirmed", "pending", "needs_review"]
+    status: Literal["confirmed", "pending", "needs_review", "user_confirmed", "rejected"]
+    transaction_hash: str | None = None
+    external_record_id: str | None = None
+    quote_amount: Decimal | None = None
+    quote_currency: str | None = None
+    transfer_status: Literal["suggested", "matched", "rejected"] | None = None

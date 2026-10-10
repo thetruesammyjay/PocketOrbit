@@ -15,6 +15,7 @@ from app.models.portfolio import Portfolio
 from app.models.price import Price
 from app.models.source import Source
 from app.models.sync_job import SyncJob
+from app.models.transfer_match import TransferMatch
 from app.models.user import User
 from app.models.valuation import ValuationSnapshot
 from app.models.wallet_snapshot import WalletSnapshot
@@ -388,6 +389,21 @@ def _build_portfolio_summary(session: Session, portfolio: Portfolio) -> Portfoli
         for source in sources
     ]
     source_name = {source.id: source.name for source in sources}
+    activity_ids = [transaction.id for transaction in transactions]
+    activity_matches = (
+        session.scalars(
+            select(TransferMatch).where(
+                (TransferMatch.outgoing_transaction_id.in_(activity_ids))
+                | (TransferMatch.incoming_transaction_id.in_(activity_ids))
+            )
+        ).all()
+        if activity_ids
+        else []
+    )
+    transfer_status_by_transaction: dict[UUID, str] = {}
+    for match in activity_matches:
+        transfer_status_by_transaction[match.outgoing_transaction_id] = match.status
+        transfer_status_by_transaction[match.incoming_transaction_id] = match.status
     activity = [
         ActivityRead(
             id=str(transaction.id),
@@ -399,10 +415,17 @@ def _build_portfolio_summary(session: Session, portfolio: Portfolio) -> Portfoli
             source_name=source_name.get(transaction.source_id, "Unknown source"),
             occurred_at=transaction.occurred_at,
             status=(
-                "confirmed"
+                transaction.quality_status
+                if transaction.quality_status in {"user_confirmed", "rejected"}
+                else "confirmed"
                 if _quality(transaction.quality_status) == QualityStatus.FRESH
                 else "needs_review"
             ),
+            transaction_hash=transaction.transaction_hash,
+            external_record_id=transaction.external_record_id,
+            quote_amount=transaction.quote_amount,
+            quote_currency=transaction.quote_currency,
+            transfer_status=transfer_status_by_transaction.get(transaction.id),
         )
         for transaction in transactions
     ]

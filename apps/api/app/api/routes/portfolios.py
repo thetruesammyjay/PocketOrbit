@@ -9,6 +9,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     Request,
     Response,
     UploadFile,
@@ -23,18 +24,25 @@ from app.core.database import get_db
 from app.core.rate_limit import enforce_rate_limit, request_client_ip
 from app.core.security import get_current_user
 from app.models.activity import Transaction
+from app.models.asset import Asset
 from app.models.balance import Balance
 from app.models.import_job import ImportJob
 from app.models.source import Source
 from app.models.sync_job import SyncJob
+from app.models.transfer_match import TransferMatch
 from app.models.user import User
 from app.models.wallet_snapshot import WalletSnapshot
+from app.schemas.activity import ActivityRead
 from app.schemas.common import QualityStatus
 from app.schemas.imports import (
     CsvBalanceFieldMapping,
     CsvFieldMapping,
     ImportJobRead,
     ImportResultRead,
+    PerformanceRead,
+    TransactionReview,
+    TransferMatchRead,
+    TransferReview,
 )
 from app.schemas.portfolio import PortfolioCreate, PortfolioRead, PortfolioSummaryRead
 from app.schemas.source import SourceRead, WalletSourceCreate
@@ -42,7 +50,9 @@ from app.schemas.wallet import WalletSyncResponse
 from app.services.csv_balance_import_service import import_csv_balance_statement
 from app.services.csv_import_service import import_csv_transactions
 from app.services.import_pricing_service import price_imported_assets
+from app.services.performance_service import get_portfolio_performance
 from app.services.persistent_portfolios import (
+    _activity_kind,
     create_user_portfolio,
     get_portfolio_summary,
     latest_sync_warnings,
@@ -51,6 +61,7 @@ from app.services.persistent_portfolios import (
     require_owned_portfolio,
 )
 from app.services.portfolio_service import get_demo_portfolio_summary
+from app.services.transfer_matching import list_transfer_matches, refresh_transfer_suggestions
 from app.services.wallet_persistence import save_wallet_snapshot
 from app.services.wallet_service import refresh_public_wallet
 
@@ -372,6 +383,9 @@ def remove_wallet_source(
             status_code=status.HTTP_404_NOT_FOUND, detail="Wallet source not found."
         )
 
+    _delete_transaction_rows(
+        session, select(Transaction.id).where(Transaction.source_id == source.id)
+    )
     session.execute(delete(Transaction).where(Transaction.source_id == source.id))
     session.execute(delete(Balance).where(Balance.source_id == source.id))
     session.execute(delete(WalletSnapshot).where(WalletSnapshot.source_id == source.id))
@@ -428,6 +442,8 @@ async def import_transactions(
     mode: str = Form(default="transactions"),
     balance_source_id: str = Form(default="", alias="balanceSourceId"),
     balance_source_name: str = Form(default="", alias="balanceSourceName"),
+    transaction_source_name: str = Form(default="", alias="transactionSourceName"),
+    history_complete: bool = Form(default=False, alias="historyComplete"),
     session: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> ImportResultRead:
@@ -448,7 +464,15 @@ async def import_transactions(
     try:
         if mode == "transactions":
             mapping = CsvFieldMapping.model_validate(json.loads(mapping_json))
-            result = import_csv_transactions(session, portfolio, filename, contents, mapping)
+            result = import_csv_transactions(
+                session,
+                portfolio,
+                filename,
+                contents,
+                mapping,
+                source_name=transaction_source_name,
+                history_complete=history_complete,
+            )
         elif mode == "balances":
             mapping = CsvBalanceFieldMapping.model_validate(json.loads(mapping_json))
             result = import_csv_balance_statement(
@@ -510,7 +534,11 @@ def portfolio_imports(
             rows_received=job.rows_received,
             rows_accepted=job.rows_accepted,
             rows_rejected=job.rows_rejected,
+            rows_duplicate=job.rows_duplicate,
             created_at=job.created_at,
+            coverage_start_at=job.coverage_start_at,
+            coverage_end_at=job.coverage_end_at,
+            history_complete=job.history_complete,
         )
         for job in jobs
     ]
@@ -552,7 +580,11 @@ def delete_portfolio_import(
                     )
                 )
         else:
-            session.execute(delete(Transaction).where(Transaction.source_id == source.id))
+            _delete_transaction_rows(
+                session,
+                select(Transaction.id).where(Transaction.import_job_id == job.id),
+            )
+            session.execute(delete(Transaction).where(Transaction.import_job_id == job.id))
             session.execute(delete(Balance).where(Balance.source_id == source.id))
             session.execute(delete(WalletSnapshot).where(WalletSnapshot.source_id == source.id))
     session.delete(job)
@@ -562,6 +594,11 @@ def delete_portfolio_import(
             select(ImportJob.id).where(ImportJob.source_id == source.id).limit(1)
         )
         if remaining_jobs is None:
+            _delete_transaction_rows(
+                session,
+                select(Transaction.id).where(Transaction.source_id == source.id),
+            )
+            session.execute(delete(Transaction).where(Transaction.source_id == source.id))
             session.execute(delete(Balance).where(Balance.source_id == source.id))
             session.execute(delete(WalletSnapshot).where(WalletSnapshot.source_id == source.id))
             session.delete(source)
@@ -569,3 +606,182 @@ def delete_portfolio_import(
     record_valuation_snapshot(session, portfolio)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{portfolio_id}/transfers", response_model=list[TransferMatchRead])
+def portfolio_transfers(
+    portfolio_id: UUID,
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> list[TransferMatchRead]:
+    portfolio = require_owned_portfolio(session, user, portfolio_id)
+    refresh_transfer_suggestions(session, portfolio)
+    session.commit()
+    return list_transfer_matches(session, portfolio)
+
+
+@router.get("/{portfolio_id}/activity", response_model=list[ActivityRead])
+def portfolio_activity(
+    portfolio_id: UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> list[ActivityRead]:
+    portfolio = require_owned_portfolio(session, user, portfolio_id)
+    source_rows = session.scalars(select(Source).where(Source.portfolio_id == portfolio.id)).all()
+    source_by_id = {source.id: source for source in source_rows}
+    if not source_by_id:
+        return []
+    transactions = session.scalars(
+        select(Transaction)
+        .where(Transaction.source_id.in_(source_by_id))
+        .order_by(Transaction.occurred_at.desc(), Transaction.id.desc())
+        .offset(offset)
+        .limit(limit)
+    ).all()
+    if not transactions:
+        return []
+    assets = session.scalars(
+        select(Asset).where(Asset.id.in_({transaction.asset_id for transaction in transactions}))
+    ).all()
+    asset_by_id = {asset.id: asset for asset in assets}
+    transaction_ids = [transaction.id for transaction in transactions]
+    matches = session.scalars(
+        select(TransferMatch).where(
+            TransferMatch.outgoing_transaction_id.in_(transaction_ids)
+            | TransferMatch.incoming_transaction_id.in_(transaction_ids)
+        )
+    ).all()
+    transfer_status: dict[UUID, str] = {}
+    for match in matches:
+        transfer_status[match.outgoing_transaction_id] = match.status
+        transfer_status[match.incoming_transaction_id] = match.status
+    return [
+        ActivityRead(
+            id=str(transaction.id),
+            kind=_activity_kind(transaction.kind),
+            asset_symbol=asset_by_id[transaction.asset_id].symbol
+            if transaction.asset_id in asset_by_id
+            else "Unknown",
+            quantity=abs(transaction.quantity),
+            source_name=source_by_id[transaction.source_id].name,
+            occurred_at=transaction.occurred_at,
+            status=(
+                transaction.quality_status
+                if transaction.quality_status in {"user_confirmed", "rejected"}
+                else "confirmed"
+                if transaction.quality_status == "fresh"
+                else "needs_review"
+            ),
+            transaction_hash=transaction.transaction_hash,
+            external_record_id=transaction.external_record_id,
+            quote_amount=transaction.quote_amount,
+            quote_currency=transaction.quote_currency,
+            transfer_status=transfer_status.get(transaction.id),
+        )
+        for transaction in transactions
+    ]
+
+
+@router.post("/{portfolio_id}/transfers/{match_id}/review", response_model=TransferMatchRead)
+def review_transfer(
+    portfolio_id: UUID,
+    match_id: UUID,
+    payload: TransferReview,
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> TransferMatchRead:
+    portfolio = require_owned_portfolio(session, user, portfolio_id)
+    match = session.scalar(
+        select(TransferMatch).where(
+            TransferMatch.id == match_id,
+            TransferMatch.portfolio_id == portfolio.id,
+        )
+    )
+    if match is None:
+        raise HTTPException(status_code=404, detail="Transfer suggestion not found.")
+    if match.status != "suggested":
+        raise HTTPException(
+            status_code=409, detail="This transfer suggestion has already been reviewed."
+        )
+    match.status = "matched" if payload.accepted else "rejected"
+    match.reviewed_at = datetime.now(UTC)
+    if payload.accepted:
+        alternatives = session.scalars(
+            select(TransferMatch).where(
+                TransferMatch.portfolio_id == portfolio.id,
+                TransferMatch.id != match.id,
+                TransferMatch.status == "suggested",
+                (
+                    TransferMatch.outgoing_transaction_id.in_(
+                        [match.outgoing_transaction_id, match.incoming_transaction_id]
+                    )
+                )
+                | (
+                    TransferMatch.incoming_transaction_id.in_(
+                        [match.outgoing_transaction_id, match.incoming_transaction_id]
+                    )
+                ),
+            )
+        ).all()
+        for alternative in alternatives:
+            alternative.status = "rejected"
+            alternative.reviewed_at = datetime.now(UTC)
+            alternative.rationale = (
+                "Closed because one of these records was confirmed in another transfer match."
+            )
+    session.commit()
+    return next(
+        item for item in list_transfer_matches(session, portfolio) if item.id == str(match.id)
+    )
+
+
+@router.post(
+    "/{portfolio_id}/activity/{transaction_id}/review", status_code=status.HTTP_204_NO_CONTENT
+)
+def review_transaction(
+    portfolio_id: UUID,
+    transaction_id: UUID,
+    payload: TransactionReview,
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    portfolio = require_owned_portfolio(session, user, portfolio_id)
+    source_ids = select(Source.id).where(Source.portfolio_id == portfolio.id)
+    transaction = session.scalar(
+        select(Transaction).where(
+            Transaction.id == transaction_id,
+            Transaction.source_id.in_(source_ids),
+        )
+    )
+    if transaction is None:
+        raise HTTPException(status_code=404, detail="Activity record not found.")
+    if transaction.quality_status not in {"needs_review", "user_confirmed", "rejected"}:
+        raise HTTPException(status_code=409, detail="This activity record cannot be reviewed.")
+    transaction.quality_status = "user_confirmed" if payload.accepted else "rejected"
+    session.flush()
+    refresh_transfer_suggestions(session, portfolio)
+    session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{portfolio_id}/performance", response_model=PerformanceRead)
+def portfolio_performance(
+    portfolio_id: UUID,
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> PerformanceRead:
+    portfolio = require_owned_portfolio(session, user, portfolio_id)
+    refresh_transfer_suggestions(session, portfolio)
+    session.flush()
+    return get_portfolio_performance(session, portfolio)
+
+
+def _delete_transaction_rows(session: Session, transaction_ids) -> None:
+    session.execute(
+        delete(TransferMatch).where(
+            TransferMatch.outgoing_transaction_id.in_(transaction_ids)
+            | TransferMatch.incoming_transaction_id.in_(transaction_ids)
+        )
+    )

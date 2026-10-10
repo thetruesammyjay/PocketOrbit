@@ -5,7 +5,7 @@
 .marketing-home { background: #fff; }
 .marketing-hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--po-border); background: radial-gradient(ellipse at 78% 45%, rgb(108 92 231 / 8%), transparent 34%), #fff; }
 .marketing-hero-layout { display: grid; min-height: 680px; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: clamp(2.5rem, 5.5vw, 5.5rem); padding-block: 3.5rem; }
-.marketing-hero-copy { position: relative; z-index: 2; max-width: 600px; padding: 2rem 0; text-align: left; animation: marketing-rise-in 650ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-hero-copy { position: relative; z-index: 2; max-width: 600px; padding: 2rem 0; text-align: left; animation: marketing-rise-in 650ms var(--ease-out) both; }
 .marketing-hero h1 { max-width: 650px; margin: 1.5rem 0 1.3rem; font-family: var(--font-display); font-size: clamp(3.6rem, 5.7vw, 5.7rem); font-weight: 600; letter-spacing: -0.077em; line-height: 0.98; }
 .marketing-hero h1 span { display: block; }
 .marketing-hero-copy > p { max-width: 570px; margin: 0; color: var(--po-text); font-size: clamp(1rem, 1.3vw, 1.12rem); line-height: 1.65; }
@@ -34,7 +34,7 @@
 .marketing-hero-source strong, .marketing-hero-source small { display: block; white-space: nowrap; }
 .marketing-hero-source strong { font-size: 0.78rem; }
 .marketing-hero-source small { margin-top: 0.15rem; color: var(--po-muted); font-size: 0.68rem; }
-.marketing-hero-balance { position: absolute; top: 19%; left: 5%; z-index: 2; width: 77%; padding: clamp(1rem, 2vw, 1.45rem); border: 1px solid rgb(227 228 222 / 90%); border-radius: 23px; background: rgb(255 255 255 / 96%); box-shadow: 0 25px 65px rgb(30 29 67 / 12%); animation: marketing-card-in 800ms 100ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-hero-balance { position: absolute; top: 19%; left: 5%; z-index: 2; width: 77%; padding: clamp(1rem, 2vw, 1.45rem); border: 1px solid rgb(227 228 222 / 90%); border-radius: 23px; background: rgb(255 255 255 / 96%); box-shadow: 0 25px 65px rgb(30 29 67 / 12%); animation: marketing-card-in 800ms 100ms var(--ease-out) both; }
 .marketing-hero-balance-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.7rem; }
 .marketing-hero-card-label { display: block; color: var(--po-muted); font-size: 0.73rem; font-weight: 550; }
 .marketing-hero-balance-value { display: block; margin-top: 0.45rem; font-family: var(--font-display); font-size: clamp(1.65rem, 3vw, 2.35rem); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.065em; line-height: 1.05; }
@@ -42,7 +42,7 @@
 .marketing-hero-balance-context { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.55rem; color: var(--po-muted); font-size: 0.68rem; }
 .marketing-hero-chart { display: block; width: 100%; height: 82px; margin: 0.9rem 0 0.8rem; overflow: visible; }
 .marketing-hero-chart-grid { fill: none; stroke: #ececf0; stroke-width: 1; }
-.marketing-hero-chart-line { fill: none; stroke: var(--po-orbit); stroke-dasharray: 1; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; animation: marketing-chart-draw 1.6s 450ms ease-out forwards; }
+.marketing-hero-chart-line { fill: none; stroke: var(--po-orbit); stroke-dasharray: 1; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; animation: marketing-chart-draw 1.6s 450ms var(--ease-out) forwards; }
 .marketing-hero-chart-point { fill: var(--po-orbit); stroke: #fff; stroke-width: 3; }
 .marketing-hero-assets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
 .marketing-hero-asset { display: flex; min-width: 0; align-items: center; gap: 0.45rem; padding: 0.48rem 0.4rem; border: 1px solid #ededea; border-radius: 11px; background: #fff; }
@@ -83,21 +83,23 @@
 .marketing-preview-assets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
 .marketing-preview-asset { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 0.65rem; min-width: 0; padding: 0.8rem 0.7rem; border: 1px solid var(--po-border); border-radius: 12px; }
 .marketing-preview-asset { transition: transform 180ms var(--ease-out), border-color 180ms ease, box-shadow 180ms ease; }
-.marketing-preview-asset:hover { transform: translateY(-3px); border-color: #c9c3f5; box-shadow: 0 8px 18px rgb(30 29 67 / 7%); }
+@media (hover: hover) and (pointer: fine) {
+  .marketing-preview-asset:hover { transform: translateY(-3px); border-color: #c9c3f5; box-shadow: 0 8px 18px rgb(30 29 67 / 7%); }
+}
 .marketing-preview-asset-mark { display: grid; width: 32px; height: 32px; place-items: center; overflow: hidden; border-radius: 50%; }
 .marketing-preview-asset-mark svg { display: block; width: 100%; height: 100%; }
 .marketing-preview-asset strong, .marketing-preview-asset small { display: block; }
 .marketing-preview-asset strong { font-size: 0.74rem; }
 .marketing-preview-asset small { margin-top: 0.1rem; overflow: hidden; color: var(--po-muted); font-size: 0.67rem; text-overflow: ellipsis; white-space: nowrap; }
 .marketing-preview-asset b { font-size: 0.72rem; font-variant-numeric: tabular-nums; }
-.marketing-preview-reveal.is-visible .marketing-preview-summary { animation: marketing-rise-in 550ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-preview-reveal.is-visible .marketing-preview-provenance { animation: marketing-rise-in 550ms 100ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-preview-reveal.is-visible .marketing-preview-chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: marketing-chart-draw 1.25s 250ms ease-out forwards; }
-.marketing-preview-reveal.is-visible .marketing-preview-asset { animation: marketing-rise-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-preview-reveal.is-visible .marketing-preview-asset:nth-child(2) { animation-delay: 90ms; }
-.marketing-preview-reveal.is-visible .marketing-preview-asset:nth-child(3) { animation-delay: 180ms; }
+.marketing-preview-reveal.is-visible .marketing-preview-summary { animation: marketing-rise-in 550ms var(--ease-out) both; }
+.marketing-preview-reveal.is-visible .marketing-preview-provenance { animation: marketing-rise-in 550ms 100ms var(--ease-out) both; }
+.marketing-preview-reveal.is-visible .marketing-preview-chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: marketing-chart-draw 1.25s 250ms var(--ease-out) forwards; }
+.marketing-preview-reveal.is-visible .marketing-preview-asset { animation: marketing-rise-in 420ms var(--ease-out) both; }
+.marketing-preview-reveal.is-visible .marketing-preview-asset:nth-child(2) { animation-delay: 60ms; }
+.marketing-preview-reveal.is-visible .marketing-preview-asset:nth-child(3) { animation-delay: 120ms; }
 .marketing-showcase-heading-story.is-visible .marketing-section-heading,
-.marketing-feature-heading-story.is-visible .marketing-section-heading { animation: marketing-rise-in 520ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-feature-heading-story.is-visible .marketing-section-heading { animation: marketing-rise-in 520ms var(--ease-out) both; }
 .marketing-preview-provenance { display: flex; flex-direction: column; padding: 2.2rem 2rem; border-left: 1px solid #dfdcf7; background: #f5f3ff; }
 .marketing-preview-provenance h3 { max-width: 260px; margin: 0.6rem 0 1.4rem; font-family: var(--font-display); font-size: 1.8rem; letter-spacing: -0.045em; line-height: 1.16; }
 .marketing-preview-provenance dl { margin: 0; }
@@ -111,9 +113,9 @@
 .marketing-section-heading--stacked { display: block; }
 .marketing-section-heading--stacked h2 { max-width: 710px; }
 .marketing-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.marketing-feature-reveal.is-visible .marketing-feature-card { animation: marketing-story-card 580ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-feature-reveal.is-visible .marketing-feature-card:nth-child(2) { animation-delay: 100ms; }
-.marketing-feature-reveal.is-visible .marketing-feature-card:nth-child(3) { animation-delay: 200ms; }
+.marketing-feature-reveal.is-visible .marketing-feature-card { animation: marketing-story-card 580ms var(--ease-out) both; }
+.marketing-feature-reveal.is-visible .marketing-feature-card:nth-child(2) { animation-delay: 60ms; }
+.marketing-feature-reveal.is-visible .marketing-feature-card:nth-child(3) { animation-delay: 120ms; }
 .marketing-feature-card { min-width: 0; overflow: hidden; border: 1px solid #ecece8; border-radius: 22px; background: #fafaf8; }
 .marketing-feature-art { position: relative; height: 235px; overflow: hidden; background: var(--po-surface-soft); }
 .marketing-feature-art > img:first-child { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -127,17 +129,17 @@
 
 .marketing-activity-band { padding: 5rem 0; border-block: 1px solid var(--po-border); background: #f6f5fa; }
 .marketing-activity-layout { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); align-items: center; gap: clamp(3rem, 7vw, 7rem); }
-.marketing-activity-reveal.is-visible .marketing-activity-copy { animation: marketing-story-left 600ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-activity-reveal.is-visible .marketing-activity-art { animation: marketing-story-right 700ms 100ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-activity-reveal.is-visible .marketing-activity-copy { animation: marketing-story-left 600ms var(--ease-out) both; }
+.marketing-activity-reveal.is-visible .marketing-activity-art { animation: marketing-story-right 700ms 80ms var(--ease-out) both; }
 .marketing-activity-copy h2 { max-width: 510px; }
 .marketing-activity-copy p { max-width: 460px; margin: 1.25rem 0 1.5rem; color: var(--po-text); font-size: 1rem; line-height: 1.65; }
 .marketing-activity-art { position: relative; }
 .marketing-activity-art > img:first-child { display: block; width: 100%; height: auto; border: 1px solid var(--po-border); border-radius: 28px; }
 .marketing-activity-comet { position: absolute; right: -1.5rem; bottom: -1.7rem; width: 88px; height: 92px; object-fit: contain; animation: marketing-float 5.5s ease-in-out infinite; }
 .marketing-more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2rem, 7vw, 8rem); padding-block: 5.8rem; }
-.marketing-more-reveal.is-visible article { animation: marketing-story-card 520ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
-.marketing-more-reveal.is-visible article:nth-child(2) { animation-delay: 140ms; }
-.marketing-more-reveal.is-visible .marketing-more-orbit { animation: marketing-orbit-pop 520ms 180ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-more-reveal.is-visible article { animation: marketing-story-card 520ms var(--ease-out) both; }
+.marketing-more-reveal.is-visible article:nth-child(2) { animation-delay: 70ms; }
+.marketing-more-reveal.is-visible .marketing-more-orbit { animation: marketing-orbit-pop 520ms 120ms var(--ease-out) both; }
 .marketing-more article { padding-top: 1.3rem; border-top: 1px solid var(--po-border); }
 .marketing-more-orbit { position: relative; display: block; width: 21px; height: 21px; margin-bottom: 1.35rem; border: 2px solid var(--po-sky); border-radius: 50%; transform: rotate(-27deg); }
 .marketing-more-orbit::after { position: absolute; top: -5px; right: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--po-sky); content: ""; }
@@ -146,7 +148,7 @@
 .marketing-more h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.45rem, 2.5vw, 2rem); letter-spacing: -0.04em; }
 .marketing-more p { max-width: 56ch; margin: 0.8rem 0 1rem; color: var(--po-text); font-size: 0.93rem; line-height: 1.65; }
 .marketing-final-wrap { padding-bottom: 5.8rem; }
-.marketing-final-reveal.is-visible .marketing-final-cta { animation: marketing-story-card 600ms cubic-bezier(0.2, 0.75, 0.25, 1) both; }
+.marketing-final-reveal.is-visible .marketing-final-cta { animation: marketing-story-card 600ms var(--ease-out) both; }
 .marketing-final-cta { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 2.4rem 2.7rem; border: 1px solid #dedaf7; border-radius: 24px; background: var(--po-violet-soft); }
 .marketing-final-cta h2 { font-size: clamp(2rem, 3.5vw, 3rem); }
 .marketing-final-cta p { margin: 0.7rem 0 0; color: var(--po-text); font-size: 0.91rem; line-height: 1.5; }
@@ -165,6 +167,66 @@
 .marketing-flow-figure { max-width: 900px; margin: 4rem auto 0; padding: 0.65rem; border: 1px solid var(--po-border); border-radius: 24px; background: var(--po-surface-soft); }
 .marketing-flow-figure img { display: block; width: 100%; height: auto; border-radius: 17px; }
 .marketing-flow-figure figcaption { padding: 0.85rem 0.6rem 0.25rem; color: var(--po-muted); font-size: 0.79rem; line-height: 1.5; }
+
+/* Explanatory pages reveal each step once as the reader reaches it. */
+.marketing-subpage-reveal.is-visible .marketing-subpage-copy { animation: marketing-story-left 600ms var(--ease-out) both; }
+.marketing-subpage-reveal.is-visible .marketing-subpage-art { animation: marketing-story-right 650ms 80ms var(--ease-out) both; }
+.marketing-process-reveal.is-visible .process-step { animation: marketing-story-card 520ms var(--ease-out) both; }
+.marketing-process-reveal.is-visible .process-step:nth-child(2) { animation-delay: 70ms; }
+.marketing-process-reveal.is-visible .process-step:nth-child(3) { animation-delay: 140ms; }
+.marketing-process-reveal.is-visible .process-step:nth-child(4) { animation-delay: 210ms; }
+.marketing-flow-reveal.is-visible .marketing-flow-figure { animation: marketing-story-card 600ms var(--ease-out) both; }
+.marketing-read-only-reveal.is-visible .read-only-panel,
+.marketing-detail-note-reveal.is-visible .detail-note { animation: marketing-rise-in 500ms var(--ease-out) both; }
+.marketing-security-reveal.is-visible .content-panel { animation: marketing-story-card 500ms var(--ease-out) both; }
+.marketing-security-reveal.is-visible .content-panel:nth-child(2) { animation-delay: 70ms; }
+.marketing-security-reveal.is-visible .content-panel:nth-child(3) { animation-delay: 140ms; }
+.marketing-security-reveal.is-visible .content-panel:nth-child(4) { animation-delay: 210ms; }
+.marketing-glossary-reveal.is-visible .glossary-row { animation: marketing-rise-in 420ms var(--ease-out) both; }
+.marketing-glossary-reveal.is-visible .glossary-row:nth-child(2) { animation-delay: 60ms; }
+.marketing-glossary-reveal.is-visible .glossary-row:nth-child(3) { animation-delay: 120ms; }
+.marketing-glossary-reveal.is-visible .glossary-row:nth-child(4) { animation-delay: 180ms; }
+.marketing-glossary-reveal.is-visible .glossary-row:nth-child(5) { animation-delay: 240ms; }
+
+@keyframes marketing-reduced-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-hero-chart-line,
+  .marketing-preview-reveal.is-visible .marketing-preview-chart-line { stroke-dashoffset: 0; }
+
+  .site-footer-live > span,
+  .marketing-hero-orbit--outer,
+  .marketing-hero-orbit--inner,
+  .marketing-hero-source,
+  .marketing-hero-mascot,
+  .marketing-activity-comet { animation: none !important; }
+
+  .marketing-hero-copy,
+  .marketing-hero-balance,
+  .marketing-hero-chart-line,
+  .marketing-preview-reveal.is-visible .marketing-preview-summary,
+  .marketing-preview-reveal.is-visible .marketing-preview-provenance,
+  .marketing-preview-reveal.is-visible .marketing-preview-asset,
+  .marketing-preview-reveal.is-visible .marketing-preview-chart-line,
+  .marketing-showcase-heading-story.is-visible .marketing-section-heading,
+  .marketing-feature-heading-story.is-visible .marketing-section-heading,
+  .marketing-feature-reveal.is-visible .marketing-feature-card,
+  .marketing-activity-reveal.is-visible .marketing-activity-copy,
+  .marketing-activity-reveal.is-visible .marketing-activity-art,
+  .marketing-more-reveal.is-visible article,
+  .marketing-more-reveal.is-visible .marketing-more-orbit,
+  .marketing-final-reveal.is-visible .marketing-final-cta,
+  .marketing-subpage-reveal.is-visible .marketing-subpage-copy,
+  .marketing-subpage-reveal.is-visible .marketing-subpage-art,
+  .marketing-process-reveal.is-visible .process-step,
+  .marketing-flow-reveal.is-visible .marketing-flow-figure,
+  .marketing-read-only-reveal.is-visible .read-only-panel,
+  .marketing-detail-note-reveal.is-visible .detail-note,
+  .marketing-security-reveal.is-visible .content-panel,
+  .marketing-glossary-reveal.is-visible .glossary-row {
+    animation: marketing-reduced-fade 180ms var(--ease-out) both !important;
+  }
+}
 .marketing-security-grid .content-panel { min-height: 184px; }
 .marketing-glossary-list { margin-top: 0.5rem; }
 

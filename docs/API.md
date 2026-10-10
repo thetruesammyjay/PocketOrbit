@@ -18,6 +18,11 @@ The FastAPI service uses `/api/v1`. Interactive API documentation is available a
 | `GET` | `/portfolios` | List the signed-in account's portfolios. |
 | `POST` | `/portfolios` | Create a portfolio. |
 | `GET` | `/portfolios/{id}/summary` | Load persisted holdings, history, sources, activity, and data quality. |
+| `GET` | `/portfolios/{id}/activity?offset=0&limit=100` | Page through saved activity records, newest first; the maximum page size is 500. |
+| `POST` | `/portfolios/{id}/activity/{transaction_id}/review` | Mark a user-provided transaction reviewed or rejected. |
+| `GET` | `/portfolios/{id}/transfers` | Discover and list conservative internal-transfer suggestions and reviewed matches. |
+| `POST` | `/portfolios/{id}/transfers/{match_id}/review` | Confirm a suggested pair as an internal transfer or reject the suggestion. |
+| `GET` | `/portfolios/{id}/performance` | Return FIFO realized/unrealized P&L, open lots, source coverage, and reasons for partial results. |
 | `GET` | `/portfolios/{id}/sources` | List saved wallet and import sources. |
 | `POST` | `/portfolios/{id}/sources/wallets` | Read and save a public wallet and its first snapshot. |
 | `POST` | `/portfolios/{id}/sources/{source_id}/sync` | Refresh a saved wallet and append a snapshot. |
@@ -51,7 +56,13 @@ The response separates `knownValue` from `totalValue`. `totalValue` is `null` wh
 
 Balance statements are attached to a named account source. Select that source on later imports to append a new snapshot; the portfolio summary uses only its latest snapshot, while history remains available. Removing an import removes only its snapshot; removing the final import also removes that source. A duplicate account name must select the existing source instead of creating a second balance source.
 
-Transaction mode stores normalized rows and shows them as activity. It does not infer current holdings from a possibly incomplete ledger. Balance mode saves a timestamped balance snapshot and shows the quantities as holdings; these are user-provided, marked `needs_review`, and do not produce a complete portfolio total. For exact token pricing, map the supported network and contract or mint; ticker-only rows stay unmatched and unpriced. Both modes store a SHA-256 file fingerprint and discard the original upload. Duplicate files are blocked until the saved import is removed. The API's configured body cap rejects oversized multipart requests before parsing.
+Transaction mode stores normalized rows and shows them as activity. It does not infer current holdings from a possibly incomplete ledger. Each transaction import has an account label, observed start/end dates, row counts, and a user assertion about whether the export contains the account's full available history. The API cannot verify that an exchange export omitted no records. Rejected rows prevent an import from being marked complete. Repeated rows from overlapping exports are skipped using the account label and normalized event identity; distinct asset rows can share an exchange transaction ID. Review rows in Activity before including them in performance.
+
+Transaction mapping can include an exchange record ID, blockchain transaction hash, fee amount and asset, and transaction value plus quote currency. The quote value means total buy cost or sell proceeds; only values in the portfolio reporting currency are currently used by FIFO. Fees and values in other currencies remain visible but keep performance partial. Balance mode saves a timestamped balance snapshot and shows the quantities as holdings; these are user-provided, marked `needs_review`, and do not produce a complete portfolio total. For exact token pricing, map the supported network and contract or mint; ticker-only rows stay unmatched and unpriced. Both modes store a SHA-256 file fingerprint and discard the original upload. Duplicate files are blocked until the saved import is removed. The API's configured body cap rejects oversized multipart requests before parsing.
+
+The FIFO performance response includes open lots and realized events with quantity, source, proceeds, and cost basis. It withholds `totalPnl` unless every known input is covered, reviewed, reconciled, and priced. Unmatched incoming activity, unsupported fees, stale or missing prices, unreviewed records, unasserted history, unresolved transfer suggestions, and wallet sources without activity history are listed as reasons. This portfolio calculation is not tax advice.
+
+Transfer matching only suggests pairs. It requires reviewed records, an exact shared asset identity, a compatible amount and timestamp, and uses an identical transaction hash as stronger evidence when available. Suggestions are never auto-confirmed. A confirmed pair stays in activity but counts as a movement between owned sources instead of a buy or sell.
 
 Both import modes report accepted and rejected rows, up to 100 row-level rejection reasons, unmatched symbols, and warnings. Users can remove an import, which deletes its saved activity or balance snapshot and allows a corrected re-import.
 
@@ -84,4 +95,4 @@ The API rejects request bodies over `MAX_REQUEST_BODY_BYTES` before parsing them
 
 ## Current launch limitations
 
-This implementation provides persistent accounts, sources, wallet snapshots, CSV transaction history, shared API rate limits, a request-body cap, email verification, password recovery, and account deletion. Before opening registration to the public, set up backup and restore procedures, monitoring, incident response, and retention policies. The app does not yet calculate explainable cost basis or realized/unrealized P&L, reconcile internal transfers, or guarantee a complete exchange transaction history.
+This implementation provides persistent accounts, sources, wallet snapshots, reviewable CSV transaction history, conservative internal-transfer suggestions, and explainable FIFO performance for supported reviewed records. It does not guarantee that user-provided exports contain every exchange record, does not index full activity for public wallets, does not value fees or convert historical quote currencies, and does not calculate tax reports. Keep totals partial when any listed input is unresolved. Before opening registration to the public, set up backup and restore procedures, monitoring, incident response, and retention policies.

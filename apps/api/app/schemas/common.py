@@ -13,6 +13,8 @@ class QualityStatus(StrEnum):
     UNMATCHED = "unmatched"
     OFFLINE = "offline"
     ESTIMATED = "estimated"
+    USER_CONFIRMED = "user_confirmed"
+    REJECTED = "rejected"
 
 
 class APIModel(BaseModel):

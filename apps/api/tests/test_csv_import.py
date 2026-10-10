@@ -81,7 +81,7 @@ class CsvImportPersistenceTests(unittest.TestCase):
             2,
         )
 
-    def test_duplicate_transaction_ids_are_rejected_without_losing_valid_rows(self) -> None:
+    def test_repeated_exchange_record_id_keeps_distinct_transaction_rows(self) -> None:
         contents = (
             b"date,asset,amount,type,network,id\n"
             b"2026-02-01,ETH,1,buy,ethereum,duplicate-id\n"
@@ -101,26 +101,24 @@ class CsvImportPersistenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            (result.rows_received, result.rows_accepted, result.rows_rejected), (2, 1, 1)
+            (result.rows_received, result.rows_accepted, result.rows_rejected), (2, 2, 0)
         )
-        self.assertEqual(result.rejected_rows[0]["row"], 3)
         job = self.session.scalar(select(ImportJob))
         self.assertIsNotNone(job)
         self.assertEqual(job.status, "needs_review")
+        rows = self.session.scalars(select(Transaction).order_by(Transaction.occurred_at)).all()
+        self.assertEqual([row.external_record_id for row in rows], ["duplicate-id", "duplicate-id"])
+        self.assertNotEqual(rows[0].source_record_id, rows[1].source_record_id)
         self.assertEqual(
             self.session.scalar(select(func.count()).select_from(Transaction)),
-            1,
+            2,
         )
 
     def test_transaction_quantities_accept_grouped_thousands_and_reject_bad_commas(self) -> None:
         contents = (
-            b"date,asset,amount,type\n"
-            b"2026-02-01,ETH,\"1,234.5\",buy\n"
-            b"2026-02-02,ETH,\"1,2\",buy\n"
+            b'date,asset,amount,type\n2026-02-01,ETH,"1,234.5",buy\n2026-02-02,ETH,"1,2",buy\n'
         )
-        mapping = CsvFieldMapping(
-            occurred_at="date", asset="asset", quantity="amount", kind="type"
-        )
+        mapping = CsvFieldMapping(occurred_at="date", asset="asset", quantity="amount", kind="type")
 
         parsed = parse_csv_transactions(contents, mapping)
 

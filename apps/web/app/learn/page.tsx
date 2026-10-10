@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -17,26 +18,30 @@ export default function LearnPage() {
     <>
       <SiteHeader />
       <main className="page-container section-space detail-page">
-        <section className="marketing-subpage-hero">
-          <div className="marketing-subpage-copy">
-            <span className="badge badge--violet">Learn</span>
-            <h1 className="page-title">Crypto, in plain language.</h1>
-            <p className="body-copy">A quick guide to the words you may see while reviewing a portfolio. Clear labels make details easier to follow.</p>
-            <Link className="button button--secondary" href="/app/sources">See sample sources</Link>
-          </div>
-          <div className="marketing-subpage-art marketing-subpage-art--learn">
-            <Image src="/illustrations/number-receipt.svg" alt="Illustrative value with its source, update, and quality details" width={560} height={350} priority />
-            <Image className="marketing-subpage-mascot" src="/brand/pocketorbit-scout.png" alt="" aria-hidden="true" width={284} height={362} />
-          </div>
-        </section>
-
-        <dl className="glossary-list marketing-glossary-list">
-          {terms.map(([term, definition]) => (
-            <div className="glossary-row" key={term}>
-              <dt>{term}</dt><dd>{definition}</dd>
+        <ScrollReveal className="marketing-subpage-reveal">
+          <section className="marketing-subpage-hero">
+            <div className="marketing-subpage-copy">
+              <span className="badge badge--violet">Learn</span>
+              <h1 className="page-title">Crypto, in plain language.</h1>
+              <p className="body-copy">A quick guide to the words you may see while reviewing a portfolio. Clear labels make details easier to follow.</p>
+              <Link className="button button--secondary" href="/app/sources">See sample sources</Link>
             </div>
-          ))}
-        </dl>
+            <div className="marketing-subpage-art marketing-subpage-art--learn">
+              <Image src="/illustrations/number-receipt.svg" alt="Illustrative value with its source, update, and quality details" width={560} height={350} priority />
+              <Image className="marketing-subpage-mascot" src="/brand/pocketorbit-scout.png" alt="" aria-hidden="true" width={284} height={362} />
+            </div>
+          </section>
+        </ScrollReveal>
+
+        <ScrollReveal className="marketing-glossary-reveal">
+          <dl className="glossary-list marketing-glossary-list">
+            {terms.map(([term, definition]) => (
+              <div className="glossary-row" key={term}>
+                <dt>{term}</dt><dd>{definition}</dd>
+              </div>
+            ))}
+          </dl>
+        </ScrollReveal>
       </main>
       <SiteFooter />
     </>

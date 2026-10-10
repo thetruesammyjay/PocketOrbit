@@ -31,10 +31,13 @@ The product's wedge is **provenance and honest confidence**: help a user see not
 - Create an account and a default portfolio; production registration uses email verification.
 - Add a public wallet on a supported network and save timestamped balance snapshots.
 - Import generic CSV transaction history or a current-balance statement, review validation results, and retain source/import records.
+- Review imported transaction rows, inspect date coverage and duplicate counts, and accept or reject rows before using them in performance calculations.
+- Review conservative internal-transfer suggestions; the app never confirms a transfer automatically and leaves equally strong candidate matches unresolved.
+- View FIFO cost basis and realized/unrealized P&L for supported reviewed records. The API withholds total P&L and explains gaps when history, identity, prices, fees, or balances do not reconcile.
 - View saved holdings, supported activity, prices when an asset is identified, source grouping, timestamps, and quality warnings.
 - Explore an unauthenticated sample portfolio that is labeled as illustrative.
 
-The product does not yet calculate cost basis or realized/unrealized P&L, reliably match internal transfers, connect directly to exchange APIs, or promise complete history/token coverage. Do not imply those features are shipped.
+The product cannot verify that an exchange export contains every record, index complete activity history for public wallets, connect directly to exchange APIs, value transaction fees, or convert historical quote currencies. Token coverage also depends on the configured RPC/indexing provider. Do not describe these areas as complete.
 
 ## Business and distribution draft
 
@@ -52,11 +55,11 @@ The product does not yet calculate cost basis or realized/unrealized P&L, reliab
 
 > People who hold crypto across wallets and exchanges have a basic problem: there is no easy way to see what they own and know whether the numbers can be trusted. Balances can be stale, assets can be missed, and a CSV may show activity without proving what someone holds today.
 >
-> PocketOrbit is a read-only portfolio tracker for Solana, Ethereum L1, and Base. Add a public wallet or import an exchange CSV. PocketOrbit saves the source and update time, organizes the records, and shows data-quality warnings alongside the portfolio. If coverage is incomplete, the app explains that instead of pretending the total is complete.
+> PocketOrbit is a read-only portfolio tracker for Solana, Ethereum L1, and Base. Add a public wallet or import an exchange CSV. PocketOrbit saves the source and update time, organizes the records, and shows data-quality warnings alongside the portfolio. Users can review imported activity, check possible internal transfers, and inspect FIFO cost basis and performance when the available history supports it. If coverage is incomplete, PocketOrbit explains that instead of pretending the total is complete.
 >
 > Our focus is provenance and confidence. A user can inspect where a balance came from, when it was retrieved, and what the app could not verify. We never ask for seed phrases or private keys, and we cannot move a user's assets.
 >
-> Today, the prototype supports public wallet snapshots, generic CSV imports, saved portfolios, and a dashboard. Cost basis, transfer matching, direct exchange connections, and complete historical performance remain work to do.
+> Today, the prototype supports public wallet snapshots, saved portfolios, reviewable CSV transaction history, conservative transfer suggestions, and explainable FIFO performance for supported records. Direct exchange connections and complete wallet transaction history remain work to do; user-provided history can still be incomplete.
 >
 > We are testing whether crypto holders with assets across wallets and exchanges will use a clearer, more honest portfolio view. **[Founder: add the team's relevant experience, verified customer evidence if available, and the next distribution step.]** PocketOrbit: your crypto, in one clear view.
 
@@ -67,9 +70,9 @@ Record this with a founder on camera or voiceover and show the product briefly. 
 1. **0:00–0:15 — Set the promise.** Show PocketOrbit and say it is read-only, with source and data quality attached to the numbers.
 2. **0:15–0:45 — Add a source.** In a working deployed or local environment, add a public address on Solana, Ethereum L1, or Base. Show that the flow asks for a public address only.
 3. **0:45–1:15 — Inspect the saved wallet result.** Show the asset, balance, network, retrieval time, provider/source, and any coverage warning.
-4. **1:15–1:50 — Import a CSV.** Use the clearly synthetic [`demo/pocketorbit-sample-balances.csv`](demo/pocketorbit-sample-balances.csv). Choose current-balance mode, map its three columns, and show the review warning. Explain that these example balances are not live or verified.
-5. **1:50–2:20 — Return to the portfolio.** Show balances grouped by source, known prices, and the overall quality/partial state. Explain that imported history is not proof of current holdings.
-6. **2:20–2:30 — Close with the boundary.** Reiterate no custody, no trading, and no private keys; state the one next feature the team is validating.
+4. **1:15–1:45 — Import a CSV.** Use the clearly synthetic [`demo/pocketorbit-sample-balances.csv`](demo/pocketorbit-sample-balances.csv). Choose current-balance mode, map its three columns, and show the review warning. Explain that these example balances are not live or verified.
+5. **1:45–2:15 — Review records and performance.** Import the two transaction fixtures described in [`demo/README.md`](demo/README.md), review the activity rows, then show the possible transfer suggestion and its manual confirmation. Open Reports to show FIFO cost basis and the reasons the sample remains partial. Do not claim that the fixture history is complete.
+6. **2:15–2:30 — Close with the boundary.** Reiterate no custody, no trading, and no private keys; state the one next feature the team is validating.
 
 Use only an account and addresses you control or have permission to display. Hide credentials, email addresses, and any private account data in the recording. If the live provider is unavailable, use clearly labeled sample data and do not call it a live wallet result.
 

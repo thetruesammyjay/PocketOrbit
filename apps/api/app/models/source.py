@@ -27,6 +27,14 @@ class Source(Base):
             postgresql_where=text("kind = 'exchange_balance_import'"),
             sqlite_where=text("kind = 'exchange_balance_import'"),
         ),
+        Index(
+            "uq_portfolio_transaction_source_name",
+            "portfolio_id",
+            func.lower(text("name")),
+            unique=True,
+            postgresql_where=text("kind = 'exchange_import'"),
+            sqlite_where=text("kind = 'exchange_import'"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)

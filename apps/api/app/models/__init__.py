@@ -13,6 +13,7 @@ from app.models.price import Price
 from app.models.rate_limit import RateLimitWindow
 from app.models.source import Source
 from app.models.sync_job import SyncJob
+from app.models.transfer_match import TransferMatch
 from app.models.user import User
 from app.models.valuation import ValuationSnapshot
 from app.models.wallet_snapshot import WalletSnapshot
@@ -32,6 +33,7 @@ __all__ = [
     "Source",
     "SyncJob",
     "Transaction",
+    "TransferMatch",
     "User",
     "ValuationSnapshot",
     "WalletSnapshot",
