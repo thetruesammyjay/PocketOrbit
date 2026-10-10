@@ -1,7 +1,6 @@
 {
   "extends": "@pocketorbit/config/tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     }
