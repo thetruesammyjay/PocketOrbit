@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     auth_cookie_samesite: str = "lax"
     auth_session_days: int = 14
     admin_emails: str = ""
+    admin_password: str = ""
     max_request_body_bytes: int = 8 * 1024 * 1024
     trusted_proxy_cidrs: str = ""
     smtp_host: str | None = None
@@ -85,14 +86,26 @@ class Settings(BaseSettings):
             problems.append("MAX_REQUEST_BODY_BYTES must not exceed 64 MiB")
         if self.auth_cookie_samesite.lower() not in {"lax", "strict", "none"}:
             problems.append("AUTH_COOKIE_SAMESITE must be Lax, Strict, or None")
-        if not self.smtp_host or not self.smtp_from_email:
-            problems.append("SMTP_HOST and SMTP_FROM_EMAIL are required for account email")
-        if self.smtp_security.strip().lower() not in {"starttls", "ssl"}:
-            problems.append("SMTP_SECURITY must be starttls or ssl")
-        if not 1 <= self.smtp_port <= 65535:
-            problems.append("SMTP_PORT must be between 1 and 65535")
-        if bool(self.smtp_username) != bool(self.smtp_password):
-            problems.append("SMTP_USERNAME and SMTP_PASSWORD must be configured together")
+        if len(self.admin_password) < 12:
+            problems.append("ADMIN_PASSWORD must contain at least 12 characters")
+        smtp_is_configured = any(
+            value and value.strip()
+            for value in (
+                self.smtp_host,
+                self.smtp_username,
+                self.smtp_password,
+                self.smtp_from_email,
+            )
+        )
+        if smtp_is_configured:
+            if not self.smtp_host or not self.smtp_from_email:
+                problems.append("SMTP_HOST and SMTP_FROM_EMAIL must be configured together")
+            if self.smtp_security.strip().lower() not in {"starttls", "ssl"}:
+                problems.append("SMTP_SECURITY must be starttls or ssl")
+            if not 1 <= self.smtp_port <= 65535:
+                problems.append("SMTP_PORT must be between 1 and 65535")
+            if bool(self.smtp_username) != bool(self.smtp_password):
+                problems.append("SMTP_USERNAME and SMTP_PASSWORD must be configured together")
         wallet_rpc_endpoints = (
             self.solana_rpc_url,
             self.evm_rpc_url,

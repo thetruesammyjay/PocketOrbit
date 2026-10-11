@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AccountActionForm } from "@/features/auth/account-action-form";
 
 export default function VerifyEmailPage() {
   return (
@@ -9,9 +8,9 @@ export default function VerifyEmailPage() {
         <Link className="brand-lockup" href="/" aria-label="PocketOrbit home">
           <Image className="brand-logo" src="/brand/PocketOrbit-Logo.png" alt="PocketOrbit" width={2034} height={427} priority />
         </Link>
-        <h1>Verify your email</h1>
-        <p className="muted">Use the link in your inbox, or request a fresh one.</p>
-        <AccountActionForm mode="verify" />
+        <h1>Email confirmation is not required</h1>
+        <p className="muted">You can use your PocketOrbit account with your email and password. Email delivery is only needed for password recovery.</p>
+        <p className="form-help"><Link href="/login">Sign in</Link> · <Link href="/register">Create an account</Link></p>
       </section>
     </main>
   );

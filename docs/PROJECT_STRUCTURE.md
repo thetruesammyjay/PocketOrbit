@@ -262,7 +262,9 @@ The inventory below lists the repository, application, package, brand, and docum
     │       │       ├── 0006_valuation_calculation_version.py
     │       │       ├── 0007_price_provenance.py
     │       │       ├── 0008_portfolio_read_indexes.py
-    │       │       └── 0009_import_balance_snapshot_reference.py
+    │       │       ├── 0009_import_balance_snapshot_reference.py
+    │       │       ├── 0010_transaction_provenance_and_transfers.py
+    │       │       └── 0011_admin_session_marker.py
     │       └── tests/
     │           ├── test_auth_sessions.py
     │           ├── test_csv_balance_import.py

@@ -71,11 +71,18 @@ def hash_session_token(token: str) -> str:
     ).hexdigest()
 
 
-def create_session(user: User, session: Session, response: Response) -> None:
+def create_session(
+    user: User, session: Session, response: Response, *, is_admin: bool = False
+) -> None:
     token = secrets.token_urlsafe(48)
     expires_at = datetime.now(UTC) + timedelta(days=settings.auth_session_days)
     session.add(
-        AuthSession(user_id=user.id, token_hash=hash_session_token(token), expires_at=expires_at)
+        AuthSession(
+            user_id=user.id,
+            token_hash=hash_session_token(token),
+            expires_at=expires_at,
+            is_admin=is_admin,
+        )
     )
     session.commit()
     response.set_cookie(
@@ -120,6 +127,7 @@ def get_current_user(request: Request, session: Session = Depends(get_db)) -> Us
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Your session has expired."
         )
+    request.state.is_admin_session = auth_session.is_admin
     user = session.get(User, auth_session.user_id)
     if not user:
         session.delete(auth_session)

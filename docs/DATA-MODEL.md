@@ -7,7 +7,7 @@ SQLAlchemy models live in `apps/api/app/models`. Alembic revisions in `apps/api/
 | Entity | Purpose |
 |---|---|
 | `User` | Account email, password hash, email verification time, and creation time. |
-| `AuthSession` | HMAC of a random browser token, owning account, expiry, and creation time. |
+| `AuthSession` | HMAC of a random browser token, owning account, admin-session marker, expiry, and creation time. |
 | `AuthActionToken` | Hashed, single-use email verification or password reset token with expiry. |
 | `Portfolio` | Owner, display name, reporting currency, and the first imported-history timestamp used to keep older valuation calculations out of current history. |
 | `Source` | Account-owned public wallet or imported CSV record; stores source kind, network, masked display label, quality, and last retrieval. |

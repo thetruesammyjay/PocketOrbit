@@ -5,12 +5,11 @@ PocketOrbit is designed to read public information. It must never request seed p
 ## Implemented controls
 
 - Account passwords are stored as scrypt hashes. Browser sessions use random tokens in HttpOnly cookies; the database stores HMAC token digests and supports revocation at logout.
-- Production accounts must verify their email before sign-in. Verification links expire after 24 hours; password reset links expire after 30 minutes. Tokens are single-use and only HMAC digests are stored. Password reset revokes every active browser session.
-- Verification and recovery emails use SMTP over STARTTLS or implicit TLS. Production startup requires SMTP host and sender settings.
+- Account registration and sign-in do not require email confirmation. Account email ownership is therefore not verified. Password reset links expire after 30 minutes, are single-use, and are stored as HMAC digests; password reset revokes every active browser session. Recovery links require optional SMTP configuration.
 - Users can delete their account after confirming their password. The API removes the active account, portfolios, sources, snapshots, transactions, imports, sessions, and account-specific rate-limit counters.
 - Portfolio reads and writes check account ownership.
 - Production startup requires HTTPS `WEB_ORIGIN`, PostgreSQL, a unique `SECRET_KEY` of at least 32 characters, and valid session settings. Production mutation requests must include a matching `Origin` or `Referer`.
-- Admin pages and every `/api/v1/admin/*` endpoint require a signed-in account whose email is in the server-only `ADMIN_EMAILS` allowlist. Configure the same comma-separated list in both the web and API environments. The API returns `404` to non-admin accounts; admin page views are recorded in the existing `audit_events` table. The admin console is read-only and does not expose secrets or full wallet addresses.
+- Admin sign-in checks the API-side `ADMIN_EMAILS` allowlist and `ADMIN_PASSWORD`. The password remains in the API secret manager and is neither stored in the database nor exposed to browser JavaScript. Admin sessions are marked in the database; regular account sessions cannot access admin pages or `/api/v1/admin/*` endpoints, even when their email matches the allowlist. Configure the same comma-separated list in web and API environments. The API returns `404` to non-admin sessions; admin page views are recorded in the existing `audit_events` table. The admin console is read-only and does not expose secrets or full wallet addresses.
 - Authentication, wallet refresh, and CSV operations use atomic PostgreSQL fixed-window rate limits shared across API instances. Limits return `429` with `Retry-After`; limiter database failures fail closed. Development without a database uses a process-local limiter only.
 - Request bodies are capped before FastAPI parses them. The default `MAX_REQUEST_BODY_BYTES` is 8 MiB, allowing a 5 MB CSV with multipart overhead.
 - Forwarded client IPs are trusted only when the direct peer belongs to an explicitly configured `TRUSTED_PROXY_CIDRS` network. Untrusted `X-Forwarded-For` headers are ignored.
@@ -23,6 +22,7 @@ PocketOrbit is designed to read public information. It must never request seed p
 
 This is an implementation baseline, not a completed security program. Before opening public registration:
 
+- decide whether accepting unconfirmed email addresses is acceptable for the intended audience; an attacker can register an address they do not own and prevent its owner from using it;
 - publish and enforce retention schedules for backups and operational records after account deletion;
 - configure additional edge-level rate limits and connection/concurrency limits for the deployment;
 - define a review and retention policy for admin audit events before public launch; current events record admin page access, not every user-facing mutation;

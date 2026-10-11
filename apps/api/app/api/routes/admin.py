@@ -2,7 +2,7 @@ from pathlib import Path
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import Integer, String, cast, func, literal, select, text, union_all
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -25,12 +25,18 @@ PAGE_SIZE_MAX = 100
 
 
 def require_admin(
-    session: Session = Depends(get_db), user: User = Depends(get_current_user)
+    request: Request,
+    session: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> User:
     allowed_emails = {
         item.strip().lower() for item in settings.admin_emails.split(",") if item.strip()
     }
-    if not allowed_emails or user.email.strip().lower() not in allowed_emails:
+    if (
+        not getattr(request.state, "is_admin_session", False)
+        or not allowed_emails
+        or user.email.strip().lower() not in allowed_emails
+    ):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found.")
     return user
 
@@ -382,7 +388,7 @@ def admin_system(
                     if settings.smtp_host and settings.smtp_from_email
                     else "not_configured"
                 ),
-                "details": "Account verification and recovery email configuration.",
+                "details": "Optional password recovery email configuration; email confirmation is disabled.",
             },
             {
                 "name": "Pricing provider",
@@ -425,6 +431,11 @@ def admin_settings(
                 "account(s)"
             ),
             "configured": bool(settings.admin_emails.strip()),
+        },
+        {
+            "name": "Admin sign-in password",
+            "value": "Configured" if len(settings.admin_password) >= 12 else "Missing",
+            "configured": len(settings.admin_password) >= 12,
         },
         {
             "name": "Email delivery",

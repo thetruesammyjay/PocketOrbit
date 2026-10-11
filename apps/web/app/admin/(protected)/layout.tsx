@@ -27,8 +27,12 @@ async function isAllowedAdmin(): Promise<boolean> {
       signal: AbortSignal.timeout(3000)
     });
     if (!response.ok) return false;
-    const account = (await response.json()) as { email?: unknown };
-    return typeof account.email === "string" && adminEmails.has(account.email.trim().toLowerCase());
+    const account = (await response.json()) as { email?: unknown; isAdmin?: unknown };
+    return (
+      account.isAdmin === true &&
+      typeof account.email === "string" &&
+      adminEmails.has(account.email.trim().toLowerCase())
+    );
   } catch {
     return false;
   }

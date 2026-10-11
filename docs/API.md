@@ -6,8 +6,9 @@ The FastAPI service uses `/api/v1`. Interactive API documentation is available a
 
 | Method | Route | Purpose |
 |---|---|---|
-| `POST` | `/auth/register` | Create an account and default portfolio; production accounts verify email before sign-in. |
+| `POST` | `/auth/register` | Create an account, default portfolio, and signed-in session. Email confirmation is not required. |
 | `POST` | `/auth/login` | Sign in and issue an HttpOnly session cookie. |
+| `POST` | `/auth/admin-login` | Sign in with an allowlisted admin email and the API's `ADMIN_PASSWORD`. |
 | `POST` | `/auth/verification/resend` | Request an email verification link without revealing whether an account exists. |
 | `POST` | `/auth/verification/confirm` | Consume a one-time email verification link. |
 | `POST` | `/auth/password/forgot` | Request a one-time password reset link. |
@@ -38,7 +39,7 @@ The FastAPI service uses `/api/v1`. Interactive API documentation is available a
 
 Every portfolio route checks ownership against the signed-in account. Mutating browser requests must come from the configured `WEB_ORIGIN` in production.
 
-Production registration sends a 24-hour verification link and does not create a session until the email is verified. Password reset links expire after 30 minutes and can be used once. Both token types are stored as keyed hashes, and password changes revoke all active sessions. Development accounts are verified immediately so local work does not require an SMTP service.
+Email confirmation is disabled: registration immediately creates a session, and existing accounts can sign in without confirming their email. The email address is therefore not proven to belong to the account owner. Password reset links expire after 30 minutes and can be used once when SMTP is configured; password changes revoke all active sessions. SMTP is optional and is not needed for registration or sign-in.
 
 ## Wallet data
 
@@ -81,9 +82,9 @@ Set values in `apps/api/.env` for local development and use the deployment secre
 - `COINGECKO_API_KEY` and the optional base URL/header settings for asset prices.
 - In production, configured RPC and CoinGecko endpoints must use HTTPS; CoinGecko API keys are sent in the supported header, not in the base URL.
 - `DATABASE_URL` for PostgreSQL, a unique `SECRET_KEY` of at least 32 characters for session-token hashing, and `WEB_ORIGIN` for the exact web origin.
-- `ADMIN_EMAILS` in both web and API environments, as the same comma-separated list. Create each administrator through normal account registration and verify the email in production; there is no separate `ADMIN_PASSWORD` or password seeded into the database.
+- `ADMIN_EMAILS` in both web and API environments, as the same comma-separated list. Set `ADMIN_PASSWORD` in the API secret manager only; the admin login checks the allowlisted email and this password, then issues a marked, revocable admin session. Regular account sessions cannot access admin routes. The shared password is not stored in the database or exposed to browser JavaScript.
 - Browser API calls use the fixed same-origin path `/api/v1` through the Next.js proxy. Set `API_INTERNAL_URL` in the web environment to a server-reachable API base URL that includes `/api/v1`; the value is used by the Next.js proxy and server-rendered portfolio fetches. Set it during the web build and deployment. Keep the API auth cookie host-only (`AUTH_COOKIE_DOMAIN` blank) and use `AUTH_COOKIE_SAMESITE=lax`. This lets the browser store the API's session cookie under the web origin, and lets SSR forward that cookie to the API. Direct browser calls to an unrelated API host do not make a host-only cookie available to the web server.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM_EMAIL`, and `SMTP_SECURITY=starttls|ssl` for production verification and recovery email. If the server requires authentication, set both `SMTP_USERNAME` and `SMTP_PASSWORD` in the secret manager.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM_EMAIL`, and `SMTP_SECURITY=starttls|ssl` only if password recovery email is needed. If the server requires authentication, set both `SMTP_USERNAME` and `SMTP_PASSWORD` in the secret manager. SMTP is not required to start the API or use accounts.
 
 `GET /health` is a liveness check. `GET /ready` returns `503` until the database is reachable and its Alembic revision matches the application head. Apply migrations as a deployment release step before routing application traffic.
 

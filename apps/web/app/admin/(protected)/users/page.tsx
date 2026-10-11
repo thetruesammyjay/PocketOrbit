@@ -10,7 +10,7 @@ export default async function UsersPage({ searchParams }: AdminRouteProps) {
     <AdminDataPage
       offset={offset}
       title="Users"
-      description="Account registration and verification overview."
+      description="Account registration and email confirmation status."
       endpoint="users"
       columns={[
         { key: "email", label: "Email" },

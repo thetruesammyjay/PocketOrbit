@@ -28,9 +28,10 @@ class DeleteAccountRequest(BaseModel):
     password: str = Field(min_length=12, max_length=1024)
 
 
-class UserRead(BaseModel):
+class UserRead(APIModel):
     id: str
     email: EmailStr
+    is_admin: bool = False
 
 
 class RegistrationResponse(APIModel):

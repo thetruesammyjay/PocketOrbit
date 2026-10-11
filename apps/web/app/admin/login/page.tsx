@@ -25,13 +25,13 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
           />
         </Link>
         <h1>Admin sign in</h1>
-        <p className="muted">Sign in with your PocketOrbit administrator account.</p>
+        <p className="muted">Use an email on the admin allowlist and the deployment admin password.</p>
         {accessDenied && (
           <p className="form-message" role="alert">
-            This account does not have administrator access. Use an account that has been granted access.
+            This session does not have administrator access. Enter the deployment admin credentials below.
           </p>
         )}
-        <AuthForm mode="login" redirectTo="/admin" />
+        <AuthForm mode="admin" redirectTo="/admin" />
         <p className="form-help">
           <Link href="/login">Sign in to a regular account</Link>{" · "}<Link href="/">Back to PocketOrbit</Link>
         </p>

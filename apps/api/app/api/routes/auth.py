@@ -1,3 +1,5 @@
+import hmac
+import secrets
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
@@ -53,8 +55,8 @@ from app.services.auth_email import (
 router = APIRouter()
 
 
-def _user_read(user: User) -> UserRead:
-    return UserRead(id=str(user.id), email=user.email)
+def _user_read(user: User, *, is_admin: bool = False) -> UserRead:
+    return UserRead(id=str(user.id), email=user.email, is_admin=is_admin)
 
 
 @router.post("/register", response_model=RegistrationResponse, status_code=status.HTTP_201_CREATED)
@@ -62,7 +64,6 @@ def register(
     payload: RegisterRequest,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_db),
 ) -> RegistrationResponse:
     email = str(payload.email).strip().lower()
@@ -90,20 +91,6 @@ def register(
     try:
         session.flush()
         session.add(Portfolio(user_id=user.id, name="My portfolio", reporting_currency="USD"))
-        if _production_mode():
-            token = issue_action_token(session, user, EMAIL_VERIFY)
-            # Persist the account, default portfolio, and token before the
-            # background email task can send a link that depends on them.
-            session.commit()
-            background_tasks.add_task(deliver_action_email, email, token, EMAIL_VERIFY)
-            return RegistrationResponse(
-                id=str(user.id),
-                email=email,
-                verification_required=True,
-                message="Check your email for a verification link before signing in.",
-            )
-
-        user.email_verified_at = datetime.now(UTC)
         create_session(user, session, response)
     except IntegrityError as exc:
         session.rollback()
@@ -115,7 +102,7 @@ def register(
         id=str(user.id),
         email=email,
         verification_required=False,
-        message="Your account is ready.",
+        message="Your account is ready. You are signed in.",
     )
 
 
@@ -146,16 +133,64 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Email or password is incorrect."
         )
-    if _production_mode() and user.email_verified_at is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                "Verify your email before signing in. You can request a new link "
-                "from the verification page."
-            ),
-        )
     create_session(user, session, response)
     return _user_read(user)
+
+
+@router.post("/admin-login", response_model=UserRead)
+def admin_login(
+    payload: SignInRequest,
+    request: Request,
+    response: Response,
+    session: Session = Depends(get_db),
+) -> UserRead:
+    email = str(payload.email).strip().lower()
+    enforce_rate_limit(
+        session,
+        scope="auth-login-ip",
+        subject=request_client_ip(request),
+        max_requests=40,
+        window_seconds=900,
+    )
+    enforce_rate_limit(
+        session,
+        scope="auth-login-email",
+        subject=email,
+        max_requests=12,
+        window_seconds=900,
+    )
+    admin_emails = {
+        address.strip().lower()
+        for address in settings.admin_emails.split(",")
+        if address.strip()
+    }
+    password_matches = bool(settings.admin_password) and hmac.compare_digest(
+        payload.password.encode("utf-8"), settings.admin_password.encode("utf-8")
+    )
+    if email not in admin_emails or not password_matches:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email or password is incorrect.",
+        )
+
+    user = session.scalar(select(User).where(User.email == email))
+    if user is None:
+        # The shared admin password stays in the API environment and is never stored.
+        user = User(email=email, password_hash=hash_password(secrets.token_urlsafe(48)))
+        session.add(user)
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+            user = session.scalar(select(User).where(User.email == email))
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Administrator sign-in is temporarily unavailable.",
+                )
+
+    create_session(user, session, response, is_admin=True)
+    return _user_read(user, is_admin=True)
 
 
 @router.post("/verification/resend", response_model=ActionResponse)
@@ -168,10 +203,12 @@ def resend_verification(
     email = str(payload.email).strip().lower()
     _limit_email_action(session, request, "verification-resend", email)
     user = session.scalar(select(User).where(User.email == email))
-    if user and user.email_verified_at is None:
+    if user and user.email_verified_at is None and _smtp_available():
         token = issue_action_token(session, user, EMAIL_VERIFY)
         session.commit()
         background_tasks.add_task(deliver_action_email, email, token, EMAIL_VERIFY)
+    if not _smtp_available():
+        return ActionResponse(message="Email confirmation is not required for account access.")
     return ActionResponse(message="If the account needs verification, a link will be sent.")
 
 
@@ -204,10 +241,14 @@ def request_password_reset(
     email = str(payload.email).strip().lower()
     _limit_email_action(session, request, "password-forgot", email)
     user = session.scalar(select(User).where(User.email == email))
-    if user:
+    if user and _smtp_available():
         token = issue_action_token(session, user, PASSWORD_RESET)
         session.commit()
         background_tasks.add_task(deliver_action_email, email, token, PASSWORD_RESET)
+    if not _smtp_available():
+        return ActionResponse(
+            message="Password recovery is unavailable until email delivery is configured."
+        )
     return ActionResponse(
         message="If an account uses this email, a password reset link will be sent."
     )
@@ -344,12 +385,12 @@ def logout(
 
 
 @router.get("/me", response_model=UserRead)
-def me(user: User = Depends(get_current_user)) -> UserRead:
-    return _user_read(user)
+def me(request: Request, user: User = Depends(get_current_user)) -> UserRead:
+    return _user_read(user, is_admin=bool(getattr(request.state, "is_admin_session", False)))
 
 
-def _production_mode() -> bool:
-    return settings.app_env.strip().lower() in {"production", "prod"}
+def _smtp_available() -> bool:
+    return bool(settings.smtp_host and settings.smtp_from_email)
 
 
 def _limit_email_action(session: Session, request: Request, action: str, email: str) -> None:

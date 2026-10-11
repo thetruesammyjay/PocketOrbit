@@ -28,7 +28,7 @@ The product's wedge is **provenance and honest confidence**: help a user see not
 
 ## What judges can verify in the current prototype
 
-- Create an account and a default portfolio; production registration uses email verification.
+- Create an account with email and password; registration signs the user in immediately.
 - Add a public wallet on a supported network and save timestamped balance snapshots.
 - Import generic CSV transaction history or a current-balance statement, review validation results, and retain source/import records.
 - Review imported transaction rows, inspect date coverage and duplicate counts, and accept or reject rows before using them in performance calculations.
