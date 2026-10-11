@@ -22,8 +22,35 @@ TOKEN_PROGRAMS = (
 class SolanaConnector(BalanceConnector):
     network_id = "solana"
 
-    def __init__(self, rpc_url: str | None = None) -> None:
+    def __init__(
+        self,
+        rpc_url: str | None = None,
+        fallback_rpc_url: str | None = None,
+    ) -> None:
         self.rpc_url = rpc_url or settings.solana_rpc_url
+        self.fallback_rpc_url = fallback_rpc_url or settings.solana_rpc_fallback_url
+        if self.fallback_rpc_url == self.rpc_url:
+            self.fallback_rpc_url = None
+        self.used_fallback_rpc = False
+        self.token_program_failures = 0
+
+    async def _request(
+        self,
+        client: httpx.AsyncClient,
+        method: str,
+        params: list[object],
+    ) -> object:
+        if not self.rpc_url:
+            raise ProviderNotConfiguredError("Solana RPC is not configured.")
+        try:
+            return await json_rpc(client, self.rpc_url, method, params)
+        except ProviderRequestError:
+            if not self.fallback_rpc_url:
+                raise
+
+        result = await json_rpc(client, self.fallback_rpc_url, method, params)
+        self.used_fallback_rpc = True
+        return result
 
     async def get_balances(
         self, public_address: str, client: httpx.AsyncClient
@@ -31,16 +58,14 @@ class SolanaConnector(BalanceConnector):
         if not self.rpc_url:
             raise ProviderNotConfiguredError("Solana RPC is not configured.")
 
-        native_task = json_rpc(
+        native_task = self._request(
             client,
-            self.rpc_url,
             "getBalance",
             [public_address, {"commitment": "confirmed"}],
         )
         token_tasks = [
-            json_rpc(
+            self._request(
                 client,
-                self.rpc_url,
                 "getTokenAccountsByOwner",
                 [
                     public_address,
@@ -50,9 +75,13 @@ class SolanaConnector(BalanceConnector):
             )
             for program_id in TOKEN_PROGRAMS
         ]
-        results = await asyncio.gather(native_task, *token_tasks)
+        # The native balance is required, but one slow token program should not
+        # discard balances returned by the native request or the other program.
+        results = await asyncio.gather(native_task, *token_tasks, return_exceptions=True)
         retrieved_at = datetime.now(UTC)
         native_result = results[0]
+        if isinstance(native_result, BaseException):
+            raise native_result
         native_lamports = native_result.get("value") if isinstance(native_result, dict) else None
         if isinstance(native_lamports, bool) or not isinstance(native_lamports, int):
             raise ProviderRequestError("Solana RPC returned an invalid native balance.")
@@ -78,6 +107,13 @@ class SolanaConnector(BalanceConnector):
 
         tokens: dict[str, dict[str, object]] = {}
         for token_result in results[1:]:
+            if isinstance(token_result, asyncio.CancelledError):
+                raise token_result
+            if isinstance(token_result, Exception):
+                self.token_program_failures += 1
+                continue
+            if isinstance(token_result, BaseException):
+                raise token_result
             if not isinstance(token_result, dict) or not isinstance(
                 token_result.get("value"), list
             ):

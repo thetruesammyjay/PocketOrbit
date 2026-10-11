@@ -97,7 +97,7 @@ def wallet_capabilities() -> dict[str, object]:
 
 def _connector(network: NetworkConfig) -> BalanceConnector:
     if network.id == "solana":
-        return SolanaConnector(network.rpc_url)
+        return SolanaConnector(network.rpc_url, network.fallback_rpc_url)
     return EvmConnector(network)
 
 
@@ -209,6 +209,16 @@ async def refresh_public_wallet(
             "This snapshot covers fungible token balances. NFTs and DeFi positions "
             "are not included."
         )
+        if isinstance(connector, SolanaConnector) and connector.token_program_failures:
+            warnings.append(
+                f"{connector.token_program_failures} Solana token program request(s) could not "
+                "be read; some SPL or Token-2022 balances may be missing. The snapshot is partial."
+            )
+        if isinstance(connector, SolanaConnector) and connector.used_fallback_rpc:
+            warnings.append(
+                "The primary Solana RPC did not return every read; the configured fallback RPC "
+                "was used for the affected requests."
+            )
     if omitted_unpersistable_balances:
         warnings.append(
             f"{omitted_unpersistable_balances} balance(s) exceeded the stored quantity precision "
@@ -289,8 +299,13 @@ async def refresh_public_wallet(
         or connector.indexed_token_discovery_truncated
         or connector.indexed_token_limit_reached
     )
-    coverage_limited = omitted_unpersistable_balances > 0 or (
-        network.id != "solana" and indexed_discovery_incomplete
+    coverage_limited = (
+        omitted_unpersistable_balances > 0
+        or (network.id != "solana" and indexed_discovery_incomplete)
+        or (
+            isinstance(connector, SolanaConnector)
+            and connector.token_program_failures > 0
+        )
     )
     is_complete = not coverage_limited and missing_prices == 0
     if not is_complete:

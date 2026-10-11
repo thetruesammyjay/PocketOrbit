@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     smtp_security: str = "starttls"
     evm_token_discovery: str = "auto"
     solana_rpc_url: str | None = None
+    solana_rpc_fallback_url: str = "https://solana-rpc.publicnode.com"
     evm_rpc_url: str | None = None
     ethereum_rpc_url: str | None = None
     base_rpc_url: str | None = None
@@ -108,6 +109,7 @@ class Settings(BaseSettings):
                 problems.append("SMTP_USERNAME and SMTP_PASSWORD must be configured together")
         wallet_rpc_endpoints = (
             self.solana_rpc_url,
+            self.solana_rpc_fallback_url,
             self.evm_rpc_url,
             self.ethereum_rpc_url,
             self.base_rpc_url,
@@ -136,6 +138,7 @@ class Settings(BaseSettings):
             problems.append("WEB_ORIGIN must be one HTTPS origin")
         endpoint_settings = (
             ("SOLANA_RPC_URL", self.solana_rpc_url),
+            ("SOLANA_RPC_FALLBACK_URL", self.solana_rpc_fallback_url),
             ("EVM_RPC_URL", self.evm_rpc_url),
             ("ETHEREUM_RPC_URL", self.ethereum_rpc_url),
             ("BASE_RPC_URL", self.base_rpc_url),

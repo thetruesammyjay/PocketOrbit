@@ -19,6 +19,7 @@ class NetworkConfig:
     token_contracts: tuple[str, ...] = ()
     invalid_token_contract_entries: int = 0
     token_contracts_truncated: bool = False
+    fallback_rpc_url: str | None = None
 
 
 def _contract_config(value: str) -> dict[str, object]:
@@ -55,7 +56,10 @@ def supported_networks() -> dict[str, NetworkConfig]:
             native_name="Solana",
             native_price_id="solana",
             price_platform_id="solana",
-            rpc_url=settings.solana_rpc_url,
+            rpc_url=settings.solana_rpc_url or settings.solana_rpc_fallback_url,
+            fallback_rpc_url=(
+                settings.solana_rpc_fallback_url if settings.solana_rpc_url else None
+            ),
         ),
         "ethereum": NetworkConfig(
             id="ethereum",

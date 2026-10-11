@@ -33,6 +33,7 @@ Do not put provider credentials in this value or in any `NEXT_PUBLIC_*` variable
 | `SMTP_SECURITY` | `starttls` or `ssl`, matching the SMTP service and port, if SMTP is configured |
 | `SMTP_USERNAME`, `SMTP_PASSWORD` | Set both when the SMTP service requires authentication |
 | `SOLANA_RPC_URL` | HTTPS RPC endpoint for Solana mainnet |
+| `SOLANA_RPC_FALLBACK_URL` | Defaults to PublicNode; retries failed Solana reads |
 | `ETHEREUM_RPC_URL` | HTTPS RPC endpoint for Ethereum mainnet; `EVM_RPC_URL` is an Ethereum fallback |
 | `BASE_RPC_URL` | HTTPS RPC endpoint for Base mainnet |
 | `ALCHEMY_API_KEY` | Optional; enables indexed EVM token discovery and the Portfolio API fallback |
