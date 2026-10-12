@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import "@fontsource-variable/inter";
@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   icons: {
     icon: "/brand/PocketOrbit-Favico.png"
   }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f7f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#f7f7f4" }
+  ]
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

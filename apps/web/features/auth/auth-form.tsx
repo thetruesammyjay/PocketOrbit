@@ -49,8 +49,8 @@ export function AuthForm({ mode, redirectTo = "/app" }: AuthFormProps) {
   const isAdmin = mode === "admin";
   return (
     <form onSubmit={handleSubmit}>
-      <label className="form-field"><span>Email</span><input type="email" autoComplete="email" required maxLength={320} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
-      <label className="form-field"><span>{isAdmin ? "Admin password" : "Password"}</span><input type="password" autoComplete={isRegister ? "new-password" : "current-password"} required minLength={12} maxLength={1024} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={isRegister ? "At least 12 characters" : isAdmin ? "Deployment admin password" : "Your password"} /></label>
+      <label className="form-field"><span>Email</span><input type="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" required maxLength={320} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
+      <label className="form-field"><span>{isAdmin ? "Admin password" : "Password"}</span><input type="password" autoComplete={isRegister ? "new-password" : "current-password"} enterKeyHint="go" required minLength={12} maxLength={1024} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={isRegister ? "At least 12 characters" : isAdmin ? "Deployment admin password" : "Your password"} /></label>
       {isRegister && <p className="form-help">Use at least 12 characters. Your portfolio is saved to your account.</p>}
       {message && <p className="form-message" role="alert">{message}</p>}
       <button className="button button--primary auth-submit" type="submit" disabled={busy}>{busy ? "Please wait…" : isRegister ? "Create account" : "Sign in"}</button>
