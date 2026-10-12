@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 
 import { Icon, type IconName } from "@/components/icon";
 import { API_BASE_PATH } from "@/lib/api-base-path";
@@ -13,9 +13,9 @@ const primaryLinks: { href: string; label: string; icon: IconName }[] = [
   { href: "/app", label: "Overview", icon: "home" },
   { href: "/app/portfolio", label: "Portfolio", icon: "wallet" },
   { href: "/app/activity", label: "Activity", icon: "activity" },
-  { href: "/app/sources", label: "Sources", icon: "chart" },
+  { href: "/app/sources", label: "Sources", icon: "database" },
   { href: "/app/insights", label: "Insights", icon: "chart" },
-  { href: "/app/learn", label: "Learn", icon: "more" }
+  { href: "/app/learn", label: "Learn", icon: "book" }
 ];
 
 const mobileLinks = [
@@ -25,13 +25,13 @@ const mobileLinks = [
   { href: "/app/insights", label: "Insights", icon: "chart" as const }
 ];
 
-const moreLinks = [
-  ["Sources", "/app/sources"],
-  ["Import a file", "/app/import"],
-  ["Add a wallet", "/app/wallets/add"],
-  ["Reports", "/app/reports"],
-  ["Learn", "/app/learn"],
-  ["Settings", "/app/settings"]
+const moreLinks: { label: string; href: string; icon: IconName }[] = [
+  { label: "Sources", href: "/app/sources", icon: "database" },
+  { label: "Import a file", href: "/app/import", icon: "upload" },
+  { label: "Add a wallet", href: "/app/wallets/add", icon: "walletAdd" },
+  { label: "Reports", href: "/app/reports", icon: "clock" },
+  { label: "Learn", href: "/app/learn", icon: "book" },
+  { label: "Settings", href: "/app/settings", icon: "settings" }
 ];
 
 function Brand() {
@@ -47,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   useEffect(() => {
     void fetch(`${API_BASE_PATH}/auth/me`, { credentials: "include", cache: "no-store" })
@@ -63,7 +64,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [moreOpen]);
 
+  useEffect(() => {
+    setPendingNavigation(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pendingNavigation) return;
+    const timeoutId = window.setTimeout(() => setPendingNavigation(null), 15_000);
+    return () => window.clearTimeout(timeoutId);
+  }, [pendingNavigation]);
+
   const isCurrent = (href: string) => pathname === href || (href !== "/app" && pathname.startsWith(`${href}/`));
+
+  function prepareNavigation(event: MouseEvent<HTMLAnchorElement>, href: string, label: string) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.currentTarget.target === "_blank") return;
+    setMoreOpen(false);
+    if (!isCurrent(href)) setPendingNavigation(label);
+  }
 
   async function signOut() {
     await fetch(`${API_BASE_PATH}/auth/logout`, {
@@ -83,11 +100,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="nav-label">Your portfolio</div>
         <nav className="sidebar-nav">
           {primaryLinks.map((item) => (
-            <Link className="sidebar-link" href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} key={item.href}>
+            <Link className="sidebar-link" href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} key={item.href} onClick={(event) => prepareNavigation(event, item.href, item.label)}>
               <span className="sidebar-icon"><Icon name={item.icon} /></span><span>{item.label}</span>
             </Link>
           ))}
-          <Link className="sidebar-link" href="/app/reports" aria-current={isCurrent("/app/reports") ? "page" : undefined}>
+          <Link className="sidebar-link" href="/app/reports" aria-current={isCurrent("/app/reports") ? "page" : undefined} onClick={(event) => prepareNavigation(event, "/app/reports", "Reports")}>
             <span className="sidebar-icon"><Icon name="clock" /></span><span>Reports</span>
           </Link>
         </nav>
@@ -98,7 +115,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="app-main">
+      <main className="app-main" aria-busy={pendingNavigation !== null}>
         <div className="mobile-app-header">
           <Brand />
           <div className="mobile-app-header-actions">
@@ -117,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav className="mobile-bottom-nav" aria-label="Main portfolio navigation">
         {mobileLinks.map((item) => (
-          <Link className="mobile-nav-link" href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} key={item.href}>
+          <Link className="mobile-nav-link" href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} key={item.href} onClick={(event) => prepareNavigation(event, item.href, item.label)}>
             <span className="sidebar-icon"><Icon name={item.icon} size={21} /></span><span>{item.label}</span>
           </Link>
         ))}
@@ -131,10 +148,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           <section className="more-sheet" id="more-sheet" role="dialog" aria-modal="true" aria-labelledby="more-title">
             <div className="more-sheet-header"><h2 id="more-title">More</h2><button className="button button--quiet" type="button" onClick={() => setMoreOpen(false)} aria-label="Close menu">Close</button></div>
             <nav className="more-grid" aria-label="More portfolio pages">
-              {moreLinks.map(([label, href]) => <Link href={href} key={href} onClick={() => setMoreOpen(false)}>{label}</Link>)}
-              {signedIn ? <button type="button" onClick={() => void signOut()}>Sign out</button> : <Link href="/login" onClick={() => setMoreOpen(false)}>Sign in</Link>}
+              {moreLinks.map((item) => (
+                <Link className="more-grid-link" href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} key={item.href} onClick={(event) => prepareNavigation(event, item.href, item.label)}>
+                  <span className="sidebar-icon"><Icon name={item.icon} size={20} /></span><span>{item.label}</span>
+                </Link>
+              ))}
+              {signedIn ? (
+                <button className="more-grid-link" type="button" onClick={() => void signOut()}>
+                  <span className="sidebar-icon"><Icon name="logout" size={20} /></span><span>Sign out</span>
+                </button>
+              ) : (
+                <Link className="more-grid-link" href="/login" onClick={() => { setMoreOpen(false); setPendingNavigation("Sign in"); }}>
+                  <span className="sidebar-icon"><Icon name="user" size={20} /></span><span>Sign in</span>
+                </Link>
+              )}
             </nav>
           </section>
+        </div>
+      )}
+
+      {pendingNavigation && (
+        <div className="route-loading-overlay" role="status" aria-live="polite">
+          <div className="route-loading-card">
+            <span className="route-loading-orbit" aria-hidden="true" />
+            <span><strong>Opening {pendingNavigation}</strong><small>Loading your portfolio view</small></span>
+          </div>
         </div>
       )}
     </div>
